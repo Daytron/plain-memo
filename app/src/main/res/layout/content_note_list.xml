@@ -23,7 +23,7 @@
         android:text="@string/note_list_empty_label"/>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/note_list_recycler_view"
+        android:id="@+id/note_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </LinearLayout>
