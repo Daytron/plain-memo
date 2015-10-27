@@ -34,11 +34,11 @@ public class Note {
         return mTitle;
     }
 
-    public void setDateTime(Date date) {
+    public void setDate(Date date) {
         mDateTime = date;
     }
 
-    public Date getDateTime() {
+    public Date getDate() {
         return mDateTime;
     }
 

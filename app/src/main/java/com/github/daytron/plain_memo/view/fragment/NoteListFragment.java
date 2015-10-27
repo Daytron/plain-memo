@@ -1,9 +1,9 @@
 package com.github.daytron.plain_memo.view.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +23,7 @@ import com.github.daytron.plain_memo.NoteListActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
+import com.github.daytron.plain_memo.view.NotePagerActivity;
 
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class NoteListFragment extends Fragment {
     private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
     private static final int REQUEST_NOTE = 1;
 
+    private TextView mEmptyTextView;
     private RecyclerView mNoteRecyclerView;
     private NoteListAdapter mAdapter;
     private boolean mSubtitleVisible;
@@ -86,6 +88,7 @@ public class NoteListFragment extends Fragment {
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((NoteListActivity)getActivity()).setSupportActionBar(toolbar);
 
+        mEmptyTextView = (TextView) view.findViewById(R.id.note_empty_text_view);
         mNoteRecyclerView = (RecyclerView) view.findViewById(R.id.note_recycler_view);
         mNoteRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -93,8 +96,12 @@ public class NoteListFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                Note note = new Note();
+                NoteBook.get(getActivity()).addNote(note);
+                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID());
+                startActivity(intent);
             }
         });
 
@@ -111,6 +118,12 @@ public class NoteListFragment extends Fragment {
         NoteBook noteBook = NoteBook.get(getActivity());
         List<Note> notes = noteBook.getNotes();
 
+        if (noteBook.getNotes().isEmpty()) {
+            mEmptyTextView.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyTextView.setVisibility(View.GONE);
+        }
+
         if (mAdapter == null) {
             mAdapter = new NoteListAdapter(notes);
             mNoteRecyclerView.setAdapter(mAdapter);
@@ -118,6 +131,8 @@ public class NoteListFragment extends Fragment {
             mAdapter.setNotes(notes);
             mAdapter.notifyDataSetChanged();
         }
+
+        updateSubtitle();
     }
 
     /**
@@ -176,7 +191,7 @@ public class NoteListFragment extends Fragment {
         public void bindCrime(Note note) {
             mNote = note;
             mTitleTextView.setText(mNote.getTitle());
-            mDateTextView.setText(mNote.getDateTime().toString());
+            mDateTextView.setText(mNote.getDate().toString());
         }
 
         /**
@@ -186,7 +201,8 @@ public class NoteListFragment extends Fragment {
          */
         @Override
         public void onClick(View v) {
-
+            Intent intent = NotePagerActivity.newIntent(getActivity(), mNote.getID());
+            startActivity(intent);
         }
     }
 
@@ -284,6 +300,14 @@ public class NoteListFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
+        inflater.inflate(R.menu.fragment_note_list, menu);
+
+        MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_subtitle);
+        if (mSubtitleVisible) {
+            subtitleItem.setTitle(R.string.hide_subtitle);
+        } else {
+            subtitleItem.setTitle(R.string.show_subtitle);
+        }
     }
 
     /**
@@ -307,7 +331,58 @@ public class NoteListFragment extends Fragment {
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
+    }
 
+    /**
+     * This hook is called whenever an item in your options menu is selected.
+     * The default implementation simply returns false to have the normal
+     * processing happen (calling the item's Runnable or sending a message to
+     * its Handler as appropriate).  You can use this method for any items
+     * for which you would like to do processing without those other
+     * facilities.
+     * <p/>
+     * <p>Derived classes should call through to the base class for it to
+     * perform the default menu handling.
+     *
+     * @param item The menu item that was selected.
+     * @return boolean Return false to allow normal menu processing to
+     * proceed, true to consume it here.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_new_crime:
+                Note note = new Note();
+                NoteBook.get(getActivity()).addNote(note);
+                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID());
+                startActivity(intent);
+                return true;
+            case R.id.menu_item_show_subtitle:
+                mSubtitleVisible = !mSubtitleVisible;
+                getActivity().supportInvalidateOptionsMenu();
+                updateSubtitle();
+                return true;
+            case R.id.action_settings:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void updateSubtitle() {
+        NoteBook noteBook = NoteBook.get(getActivity());
+        int noteCount = noteBook.getNotes().size();
+        String subtitle = getString(R.string.subtitle_format, noteCount);
+
+        if (!mSubtitleVisible) {
+            subtitle = null;
+        }
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        ActionBar actionBar = activity.getSupportActionBar();
+
+        if (actionBar != null) actionBar.setSubtitle(subtitle);
     }
 }

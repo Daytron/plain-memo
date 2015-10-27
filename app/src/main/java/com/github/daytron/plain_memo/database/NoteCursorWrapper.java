@@ -27,7 +27,7 @@ public class NoteCursorWrapper extends CursorWrapper {
         Note note = new Note(UUID.fromString(uuidString));
         note.setTitle(title);
         note.setBody(body);
-        note.setDateTime(new Date(date));
+        note.setDate(new Date(date));
 
         return note;
     }

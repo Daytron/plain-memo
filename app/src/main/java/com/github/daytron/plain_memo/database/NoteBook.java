@@ -92,18 +92,18 @@ public class NoteBook {
         values.put(NoteTable.Cols.UUID, note.getID().toString());
         values.put(NoteTable.Cols.TITLE, note.getTitle());
         values.put(NoteTable.Cols.BODY, note.getBody());
-        values.put(NoteTable.Cols.DATE, note.getDateTime().getTime());
+        values.put(NoteTable.Cols.DATE, note.getDate().getTime());
 
         return values;
     }
 
-    public void addCrime(Note note) {
+    public void addNote(Note note) {
         ContentValues values = getContentValues(note);
 
         mDatabase.insert(NoteTable.NAME, null, values);
     }
 
-    public void updateCrime(Note note) {
+    public void updateNote(Note note) {
         String uuidString = note.getID().toString();
         ContentValues values = getContentValues(note);
 
@@ -112,7 +112,7 @@ public class NoteBook {
                 new String[]{uuidString});
     }
 
-    public void deleteCrime(Note note) {
+    public void deleteNote(Note note) {
         String uuidString = note.getID().toString();
 
         mDatabase.delete(NoteTable.NAME,

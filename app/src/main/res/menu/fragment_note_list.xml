@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".NoteListActivity">
+
+      <item
+          android:id="@+id/menu_item_new_crime"
+          android:icon="@drawable/ic_menu_add"
+          android:title="@string/new_note"
+          app:showAsAction="ifRoom|withText" />
+      <item
+          android:id="@+id/menu_item_show_subtitle"
+          android:title="@string/show_subtitle"
+          app:showAsAction="ifRoom" />
+      <item android:id="@+id/action_settings"
+          android:title="@string/action_settings"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+</menu>

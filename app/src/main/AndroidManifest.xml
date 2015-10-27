@@ -18,6 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".view.NotePagerActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".NoteListActivity" >
+        </activity>
     </application>
 
 </manifest>
