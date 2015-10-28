@@ -1,5 +1,6 @@
 package com.github.daytron.plain_memo.model;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ public class Note {
 
     public Note(UUID id) {
         mID = id;
-        mDateTime = new Date();
+        mDateTime = Calendar.getInstance().getTime();
     }
 
     public UUID getID() {
