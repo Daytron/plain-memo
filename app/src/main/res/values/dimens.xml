@@ -6,4 +6,7 @@
 
     <dimen name="note_list_margin_left_right">7dp</dimen>
     <dimen name="note_list_margin_bottom">45dp</dimen>
+
+    <dimen name="font_size_medium">18sp</dimen>
+    <dimen name="font_size_large">22sp</dimen>
 </resources>

@@ -11,7 +11,8 @@
     <string name="subtitle_format">%1$s crimes</string>
 
     <string name="note_title_label">Title</string>
-    <string name="note_title_hint">Enter a title for the crime.</string>
+    <string name="note_title_hint">Enter a title for the note</string>
+    <string name="note_body_hint">Enter message</string>
     <string name="note_body_label">Note</string>
     <string name="note_solved_label">Solved</string>
 

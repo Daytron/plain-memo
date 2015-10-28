@@ -16,6 +16,8 @@
         android:id="@+id/note_empty_text_view"
         android:layout_width="match_parent"
         android:padding = "36dp"
+        android:textColor="@color/colorFontNormal"
+        android:textSize="@dimen/font_size_large"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:text="@string/note_list_empty_label"/>

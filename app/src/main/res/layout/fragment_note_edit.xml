@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/note_title_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="25dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="5dp"
+        android:singleLine="true"
+        android:textSize="@dimen/font_size_medium"
+        android:background="@android:color/transparent"
+        android:inputType="textShortMessage|textCapSentences"
+        android:ellipsize="end"
+        android:hint="@string/note_title_hint"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorNoteItemSeparator"/>
+
+    <EditText
+        android:id="@+id/note_body_edit_text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/font_size_medium"
+        android:gravity="top|start"
+        android:paddingTop="20dp"
+        android:scrollbars="vertical"
+        android:isScrollContainer="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:inputType="textMultiLine|textCapSentences|textLongMessage"
+        android:background="@android:color/transparent"
+        android:hint="@string/note_body_hint"
+        android:ems="10" />
+
+</LinearLayout>

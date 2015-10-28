@@ -4,6 +4,16 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
-    <color name="colorBackgroundNoteList">#E8EAF6</color>
+    <color name="colorBackgroundNoteBody">#E8EAF6</color>
+    <color name="colorBackgroundNoteTitle">#DEE0EA</color>
     <color name="colorNoteItemSeparator">#CCCCCC</color>
+
+    <!--
+    First 2 values represent opacity in hex (base16)
+    For 87% opacity: 0.87 * 255 = 222 (DE in hex)
+    -->
+    <color name="colorFontNormal">#DE000000</color>
+
+    <!-- 66% opacity (170 or AA in hex) -->
+    <color name="colorFontSub">#AA000000</color>
 </resources>
