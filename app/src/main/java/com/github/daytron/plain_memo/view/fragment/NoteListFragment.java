@@ -1,21 +1,27 @@
 package com.github.daytron.plain_memo.view.fragment;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,6 +29,7 @@ import com.github.daytron.plain_memo.NoteListActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
+import com.github.daytron.plain_memo.util.DateUtil;
 import com.github.daytron.plain_memo.view.NotePagerActivity;
 
 import java.util.List;
@@ -35,6 +42,7 @@ public class NoteListFragment extends Fragment {
     private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
     private static final int REQUEST_NOTE = 1;
 
+    private LinearLayout mContentLinearLayout;
     private TextView mEmptyTextView;
     private RecyclerView mNoteRecyclerView;
     private NoteListAdapter mAdapter;
@@ -85,10 +93,21 @@ public class NoteListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_note_list, container, false);
 
+        // ContextCompat allows app to choose between pre SDK 23 and above for getColor method
+        int bgColor = ContextCompat.getColor(getActivity(),R.color.colorBackgroundNoteList);
+
+        mContentLinearLayout = (LinearLayout) view.findViewById(R.id.note_linear_layout_bg);
+        mContentLinearLayout.setBackgroundColor(bgColor);
+
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((NoteListActivity)getActivity()).setSupportActionBar(toolbar);
 
+        // Using material design font color 87% opacity dark color on light background
+        // alpha value = 0.87 * 255 (round up) = 222
+        int fontBlackColor = Color.argb(222,0,0,0);
+
         mEmptyTextView = (TextView) view.findViewById(R.id.note_empty_text_view);
+        mEmptyTextView.setTextColor(fontBlackColor);
         mNoteRecyclerView = (RecyclerView) view.findViewById(R.id.note_recycler_view);
         mNoteRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -178,20 +197,36 @@ public class NoteListFragment extends Fragment {
 
         private TextView mTitleTextView;
         private TextView mDateTextView;
+        private TextView mTimeTextView;
 
         public NoteHolder(View itemView) {
             super(itemView);
 
             itemView.setOnClickListener(this);
 
+            int fontBlackColor = Color.argb(185,0,0,0);
+
             mTitleTextView = (TextView) itemView.findViewById(R.id.list_item_note_title_text_view);
             mDateTextView = (TextView) itemView.findViewById(R.id.list_item_note_date_text_view);
+            mTimeTextView = (TextView) itemView.findViewById(R.id.list_item_note_time_text_view);
+
+            mTitleTextView.setTextColor(fontBlackColor);
+            mDateTextView.setTextColor(fontBlackColor);
+            mTimeTextView.setTextColor(fontBlackColor);
         }
 
         public void bindCrime(Note note) {
             mNote = note;
             mTitleTextView.setText(mNote.getTitle());
-            mDateTextView.setText(mNote.getDate().toString());
+
+            if (DateUtils.isToday(mNote.getDate().getTime())) {
+                mDateTextView.setText(R.string.today);
+            } else {
+                mDateTextView.setText(DateUtil.getDateStringLocale(getActivity(),
+                        mNote.getDate()));
+            }
+            mTimeTextView.setText(DateUtil.getTimeStringLocale(getActivity(),
+                    mNote.getDate()));
         }
 
         /**
