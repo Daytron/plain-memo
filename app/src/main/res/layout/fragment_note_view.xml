@@ -18,11 +18,12 @@
         android:paddingBottom="10dp">
 
         <TextView
-            android:id="@+id/note_title_edit_text"
+            android:id="@+id/note_title_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:textSize="@dimen/font_size_large"
+            android:textColor="@color/colorFontNormal"
             tools:text="My note"/>
 
         <TextView
@@ -40,13 +41,14 @@
         android:background="@color/colorNoteItemSeparator"/>
 
     <TextView
-        android:id="@+id/note_body_edit_text"
+        android:id="@+id/note_body_text_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="20dp"
         android:textSize="@dimen/font_size_medium"
+        android:textColor="@color/colorFontNormal"
         tools:text="This is a note" />
 
 </LinearLayout>

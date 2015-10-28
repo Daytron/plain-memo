@@ -1,11 +1,10 @@
 package com.github.daytron.plain_memo.view.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,7 +12,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.github.daytron.plain_memo.R;
@@ -26,22 +24,27 @@ import java.util.UUID;
 /**
  * Created by ryan on 27/10/15.
  */
-public class NoteFragment extends Fragment {
+public class NoteFragmentView extends Fragment {
 
     private static final String ARG_NOTE_ID = "note_id";
+    private static final String ARG_NOTE_IS_NEW = "note_is_new";
+
+    private static final int REQUEST_NOTE_EDIT = 1;
 
     private Note mNote;
-    private EditText mTitleField;
+    private TextView mTitleTextView;
     private TextView mDateTextView;
-    private EditText mBodyField;
+    private TextView mBodyTextView;
 
-    private boolean updated;
+    private boolean mUpdated;
+    private boolean mNewNote;
 
-    public static NoteFragment newInstance(UUID noteId) {
+    public static NoteFragmentView newInstance(UUID noteId, boolean isNewNote) {
         Bundle args = new Bundle();
         args.putSerializable(ARG_NOTE_ID, noteId);
+        args.putBoolean(ARG_NOTE_IS_NEW, isNewNote);
 
-        NoteFragment fragment = new NoteFragment();
+        NoteFragmentView fragment = new NoteFragmentView();
         fragment.setArguments(args);
         return fragment;
     }
@@ -63,11 +66,12 @@ public class NoteFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         UUID noteId = (UUID) getArguments().getSerializable(ARG_NOTE_ID);
 
         mNote = NoteBook.get(getActivity()).getNote(noteId);
         setHasOptionsMenu(true);
+
+        mNewNote = getArguments().getBoolean(ARG_NOTE_IS_NEW);
     }
 
     /**
@@ -91,74 +95,76 @@ public class NoteFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        updated = false;
-        View v = inflater.inflate(R.layout.fragment_note,container,false);
+        mUpdated = false;
+        View v = inflater.inflate(R.layout.fragment_note_view,container,false);
 
-        mTitleField = (EditText) v.findViewById(R.id.note_title_edit_text);
-        mTitleField.setText(mNote.getTitle());
+        mTitleTextView = (TextView) v.findViewById(R.id.note_title_text_view);
+        mTitleTextView.setAllCaps(false);
+        mTitleTextView.setText(mNote.getTitle());
 
-        mBodyField = (EditText) v.findViewById(R.id.note_body_edit_text);
-        mBodyField.setAllCaps(false);
-        mBodyField.setText(mNote.getBody());
+        mBodyTextView = (TextView) v.findViewById(R.id.note_body_text_view);
+        mBodyTextView.setAllCaps(false);
+        mBodyTextView.setText(mNote.getBody());
 
         mDateTextView = (TextView) v.findViewById(R.id.note_date_text_view);
         mDateTextView.setAllCaps(false);
-
-        mTitleField.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                updated = true;
-                mNote.setTitle(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        mBodyField.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                updated = true;
-                mNote.setBody(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
 
         updateDate(mNote.getDate());
         return v;
     }
 
+    /**
+     * Called when the fragment is visible to the user and actively running.
+     * This is generally
+     * tied to {@link Activity#onResume() Activity.onResume} of the containing
+     * Activity's lifecycle.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Forward to note edit fragment if request new note
+        // Triggered at this stage after all views are initialised, so
+        // that when the user return back to this view in the stack through
+        // back button, the views are already setup and inflated.
+        // Allowing for easy binding new data changes
+        if (mNewNote) {
+            callEditFragment();
+            mNewNote = false;
+        }
+    }
+
     private void updateDate(Date date) {
-        CharSequence dateText = DateFormat.format("cccc, MMMM d, yyyy", date);
+        CharSequence dateText = DateFormat.format("cccc, MMMM d, yyyy   h:mm aa", date);
         mDateTextView.setText(dateText);
     }
 
     /**
-     * Called when the Fragment is no longer resumed.  This is generally
-     * tied to {@link Activity#onPause() Activity.onPause} of the containing
-     * Activity's lifecycle.
+     * Receive the result from a previous call to
+     * {@link #startActivityForResult(Intent, int)}.  This follows the
+     * related Activity API as described there in
+     * {@link Activity#onActivityResult(int, int, Intent)}.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode  The integer result code returned by the child activity
+     *                    through its setResult().
+     * @param data        An Intent, which can return result data to the caller
      */
     @Override
-    public void onPause() {
-        super.onPause();
-        if (updated) mNote.setDate(new Date());
-        NoteBook.get(getActivity()).updateNote(mNote);
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK ) {
+            return;
+        }
+
+        if (requestCode == REQUEST_NOTE_EDIT) {
+            // retrieve new changes
+            mNote = NoteBook.get(getActivity()).getNote(mNote.getID());
+            mTitleTextView.setText(mNote.getTitle());
+            mBodyTextView.setText(mNote.getBody());
+            updateDate(mNote.getDate());
+        }
     }
 
     /**
@@ -177,7 +183,7 @@ public class NoteFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_note, menu);
+        inflater.inflate(R.menu.fragment_note_view, menu);
     }
 
     /**
@@ -199,6 +205,10 @@ public class NoteFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_item_edit_note:
+                // start edit fragment
+                callEditFragment();
+                return true;
             case R.id.menu_item_delete_note :
                 NoteBook noteBook = NoteBook.get(getActivity());
                 noteBook.deleteNote(mNote);
@@ -208,5 +218,10 @@ public class NoteFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void callEditFragment() {
+        Intent intent = NoteEditActivity.newIntent(getActivity(),mNote.getID());
+        startActivityForResult(intent, REQUEST_NOTE_EDIT);
     }
 }

@@ -99,6 +99,7 @@ public class NoteListFragment extends Fragment {
         mContentLinearLayout = (LinearLayout) view.findViewById(R.id.note_linear_layout_bg);
         mContentLinearLayout.setBackgroundColor(bgColor);
 
+        mEmptyTextView = (TextView) view.findViewById(R.id.note_empty_text_view);
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((NoteListActivity)getActivity()).setSupportActionBar(toolbar);
 
@@ -113,7 +114,9 @@ public class NoteListFragment extends Fragment {
 //                        .setAction("Action", null).show();
                 Note note = new Note();
                 NoteBook.get(getActivity()).addNote(note);
-                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID());
+
+                boolean isNewNote = true;
+                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), isNewNote);
                 startActivity(intent);
             }
         });
@@ -223,7 +226,7 @@ public class NoteListFragment extends Fragment {
          */
         @Override
         public void onClick(View v) {
-            Intent intent = NotePagerActivity.newIntent(getActivity(), mNote.getID());
+            Intent intent = NotePagerActivity.newIntent(getActivity(), mNote.getID(),false);
             startActivity(intent);
         }
     }
@@ -378,7 +381,7 @@ public class NoteListFragment extends Fragment {
             case R.id.menu_item_new_crime:
                 Note note = new Note();
                 NoteBook.get(getActivity()).addNote(note);
-                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID());
+                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), true);
                 startActivity(intent);
                 return true;
             case R.id.menu_item_show_subtitle:

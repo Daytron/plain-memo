@@ -5,7 +5,9 @@
     <string name="note_list_empty_label">There are no notes</string>
 
     <string name="new_note">New Crime</string>
+    <string name="edit_note">Edit</string>
     <string name="delete_note">Delete</string>
+    <string name="cancel_note">Cancel</string>
     <string name="show_subtitle">Show Subtitle</string>
     <string name="hide_subtitle">Hide Subtitle</string>
     <string name="subtitle_format">%1$s crimes</string>

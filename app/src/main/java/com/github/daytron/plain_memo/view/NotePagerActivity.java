@@ -12,7 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
-import com.github.daytron.plain_memo.view.fragment.NoteFragment;
+import com.github.daytron.plain_memo.view.fragment.NoteFragmentView;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,13 +24,17 @@ public class NotePagerActivity extends AppCompatActivity {
 
     private static final String EXTRA_NOTE_ID =
             "com.github.daytron.plain_memo.note_id";
+    private static final String EXTRA_NOTE_IS_NEW =
+            "com.github.daytron.plain_memo.note_is_new";
 
     private ViewPager mViewPager;
     private List<Note> mNotes;
 
-    public static Intent newIntent(Context packageContext, UUID noteId) {
+    public static Intent newIntent(Context packageContext, UUID noteId,
+                                   boolean isNewNote) {
         Intent intent = new Intent(packageContext, NotePagerActivity.class);
         intent.putExtra(EXTRA_NOTE_ID, noteId);
+        intent.putExtra(EXTRA_NOTE_IS_NEW, isNewNote);
         return intent;
     }
 
@@ -44,7 +48,8 @@ public class NotePagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_pager);
 
-        UUID crimeId = (UUID) getIntent().getSerializableExtra(EXTRA_NOTE_ID);
+        final UUID crimeId = (UUID) getIntent().getSerializableExtra(EXTRA_NOTE_ID);
+        final boolean isNewNote = getIntent().getBooleanExtra(EXTRA_NOTE_IS_NEW,false);
 
         mViewPager = (ViewPager) findViewById(R.id.activity_note_pager_view_pager);
 
@@ -54,7 +59,12 @@ public class NotePagerActivity extends AppCompatActivity {
             @Override
             public Fragment getItem(int position) {
                 Note note = mNotes.get(position);
-                return NoteFragment.newInstance(note.getID());
+                if (crimeId.equals(note.getID())) {
+                    return NoteFragmentView.newInstance(note.getID(), isNewNote);
+                } else {
+                    return NoteFragmentView.newInstance(note.getID(), false);
+                }
+
             }
 
             @Override
