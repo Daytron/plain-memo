@@ -17,8 +17,8 @@ abstract class DatabaseManager {
 
     static private class DBOpenHelper extends SQLiteOpenHelper {
 
-        DatabaseManager databaseManager;
-        private AtomicInteger counter = new AtomicInteger(0);
+        final DatabaseManager databaseManager;
+        private final AtomicInteger counter = new AtomicInteger(0);
 
         public DBOpenHelper(Context appContext, String dbName, int dbVersion,
                             DatabaseManager dbManager) {

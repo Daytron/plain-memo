@@ -19,9 +19,9 @@ public class NoteBook {
 
     private static NoteBook sNoteBook = null;
 
-    private Context mContext;
-    private SQLiteDatabase mDatabase;
-    private NotesDatabaseManager notesDbManager;
+    private final Context mContext;
+    private final SQLiteDatabase mDatabase;
+    private final NotesDatabaseManager notesDbManager;
 
     public static NoteBook get(Context appContext) {
         if (sNoteBook == null) {

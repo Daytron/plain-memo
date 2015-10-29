@@ -9,7 +9,7 @@ import java.util.UUID;
  */
 public class Note {
 
-    private UUID mID;
+    private final UUID mID;
     private String mTitle;
     private String mBody;
     private Date mDateTime;
