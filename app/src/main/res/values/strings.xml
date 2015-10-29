@@ -6,6 +6,7 @@
 
     <string name="new_note">New Crime</string>
     <string name="edit_note">Edit</string>
+    <string name="save_note">Save</string>
     <string name="delete_note">Delete</string>
     <string name="cancel_note">Cancel</string>
     <string name="show_subtitle">Show Subtitle</string>
