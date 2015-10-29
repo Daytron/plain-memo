@@ -17,14 +17,16 @@ import android.widget.TextView;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
+import com.github.daytron.plain_memo.view.NoteEditActivity;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
 /**
  * Created by ryan on 27/10/15.
  */
-public class NoteFragmentView extends Fragment {
+public class NoteViewFragment extends Fragment {
 
     private static final String ARG_NOTE_ID = "note_id";
     private static final String ARG_NOTE_IS_NEW = "note_is_new";
@@ -36,15 +38,14 @@ public class NoteFragmentView extends Fragment {
     private TextView mDateTextView;
     private TextView mBodyTextView;
 
-    private boolean mUpdated;
     private boolean mNewNote;
 
-    public static NoteFragmentView newInstance(UUID noteId, boolean isNewNote) {
+    public static NoteViewFragment newInstance(UUID noteId, boolean isNewNote) {
         Bundle args = new Bundle();
         args.putSerializable(ARG_NOTE_ID, noteId);
         args.putBoolean(ARG_NOTE_IS_NEW, isNewNote);
 
-        NoteFragmentView fragment = new NoteFragmentView();
+        NoteViewFragment fragment = new NoteViewFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -95,7 +96,6 @@ public class NoteFragmentView extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mUpdated = false;
         View v = inflater.inflate(R.layout.fragment_note_view,container,false);
 
         mTitleTextView = (TextView) v.findViewById(R.id.note_title_text_view);
@@ -129,7 +129,7 @@ public class NoteFragmentView extends Fragment {
         // back button, the views are already setup and inflated.
         // Allowing for easy binding new data changes
         if (mNewNote) {
-            callEditFragment();
+            callEditFragment(mNewNote);
             mNewNote = false;
         }
     }
@@ -154,17 +154,36 @@ public class NoteFragmentView extends Fragment {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != Activity.RESULT_OK ) {
-            return;
+        if (resultCode == Activity.RESULT_CANCELED ) {
+            if (requestCode == REQUEST_NOTE_EDIT) {
+                boolean isForDeletion = data.getBooleanExtra(
+                        NoteEditFragment.EXTRA_NOTE_FOR_DELETION,false);
+
+                if (isForDeletion) {
+                    NoteBook.get(getActivity()).deleteNote(mNote);
+                    getActivity().finish();
+                }
+            }
+        } else if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_NOTE_EDIT) {
+                // Retrieve new changes
+                mNote = NoteBook.get(getActivity()).getNote(mNote.getID());
+                String[] stringUpdatedData = data.getStringArrayExtra(
+                        NoteEditFragment.EXTRA_NOTE_STRING_VALUES);
+                mNote.setTitle(stringUpdatedData[0]);
+                mNote.setBody(stringUpdatedData[1]);
+                mNote.setDate(Calendar.getInstance().getTime());
+
+                // Apply new changes to views
+                mTitleTextView.setText(mNote.getTitle());
+                mBodyTextView.setText(mNote.getBody());
+                updateDate(mNote.getDate());
+
+                // Update database
+                NoteBook.get(getActivity()).updateNote(mNote);
+            }
         }
 
-        if (requestCode == REQUEST_NOTE_EDIT) {
-            // retrieve new changes
-            mNote = NoteBook.get(getActivity()).getNote(mNote.getID());
-            mTitleTextView.setText(mNote.getTitle());
-            mBodyTextView.setText(mNote.getBody());
-            updateDate(mNote.getDate());
-        }
     }
 
     /**
@@ -207,7 +226,7 @@ public class NoteFragmentView extends Fragment {
         switch (item.getItemId()) {
             case R.id.menu_item_edit_note:
                 // start edit fragment
-                callEditFragment();
+                callEditFragment(false);
                 return true;
             case R.id.menu_item_delete_note :
                 NoteBook noteBook = NoteBook.get(getActivity());
@@ -220,8 +239,8 @@ public class NoteFragmentView extends Fragment {
         }
     }
 
-    private void callEditFragment() {
-        Intent intent = NoteEditActivity.newIntent(getActivity(),mNote.getID());
+    private void callEditFragment(boolean isNewNote) {
+        Intent intent = NoteEditActivity.newIntent(getActivity(), mNote.getID(), isNewNote);
         startActivityForResult(intent, REQUEST_NOTE_EDIT);
     }
 }

@@ -19,4 +19,12 @@
     <string name="note_solved_label">Solved</string>
 
     <string name="today">Today</string>
+
+    <!-- Confirmation dialog -->
+    <string name="confirm_dialog_title">Confirm Action</string>
+    <string name="confirm_dialog_body_save">Do you want to save this note?</string>d
+    <string name="dialog_button_yes">Yes</string>
+    <string name="dialog_button_no">No</string>
+
+    <string name="toast_title_empty">Please enter a title</string>
 </resources>

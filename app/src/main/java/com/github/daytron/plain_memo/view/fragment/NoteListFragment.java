@@ -171,7 +171,7 @@ public class NoteListFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        isDBClose = NoteBook.get(getActivity()).closeDB();
+
     }
 
     /**

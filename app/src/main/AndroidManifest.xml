@@ -24,7 +24,7 @@
             android:label="@string/app_name"
             android:parentActivityName=".NoteListActivity" >
         </activity>
-        <activity android:name=".view.fragment.NoteEditActivity"
+        <activity android:name=".view.NoteEditActivity"
                   android:label="@string/app_name">
         </activity>
     </application>

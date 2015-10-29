@@ -12,7 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
-import com.github.daytron.plain_memo.view.fragment.NoteFragmentView;
+import com.github.daytron.plain_memo.view.fragment.NoteViewFragment;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,9 +60,9 @@ public class NotePagerActivity extends AppCompatActivity {
             public Fragment getItem(int position) {
                 Note note = mNotes.get(position);
                 if (crimeId.equals(note.getID())) {
-                    return NoteFragmentView.newInstance(note.getID(), isNewNote);
+                    return NoteViewFragment.newInstance(note.getID(), isNewNote);
                 } else {
-                    return NoteFragmentView.newInstance(note.getID(), false);
+                    return NoteViewFragment.newInstance(note.getID(), false);
                 }
 
             }
@@ -80,5 +80,4 @@ public class NotePagerActivity extends AppCompatActivity {
             }
         }
     }
-
 }
