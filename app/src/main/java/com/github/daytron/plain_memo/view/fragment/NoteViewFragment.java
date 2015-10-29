@@ -129,7 +129,7 @@ public class NoteViewFragment extends Fragment {
         // back button, the views are already setup and inflated.
         // Allowing for easy binding new data changes
         if (mNewNote) {
-            callEditFragment(mNewNote);
+            callEditFragment(true);
             mNewNote = false;
         }
     }
