@@ -5,7 +5,7 @@
     <item
         android:id="@+id/menu_item_save_note"
         android:icon="@drawable/ic_menu_save"
-        android:title="@string/delete_note"
+        android:title="@string/save_note"
         app:showAsAction="ifRoom|withText" />
 
 </menu>
