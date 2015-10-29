@@ -42,7 +42,8 @@ public class NoteEditActivity extends SingleFragmentActivity {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
         if (fragment instanceof NoteEditFragment) {
-            ((NoteEditFragment) fragment).showConfirmSaveDialog(false);
+            ((NoteEditFragment) fragment).showConfirmSaveDialog(
+                    getSupportActionBar().getThemedContext(), false);
         } else {
             super.onBackPressed();
         }

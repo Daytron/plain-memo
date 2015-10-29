@@ -1,12 +1,16 @@
 package com.github.daytron.plain_memo.view.fragment;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -156,8 +160,8 @@ public class NoteEditFragment extends Fragment {
      * @param listener  The DialogInterface.OnClickListener object that can be used as click
      *                  listener for AlertDialog object.
      */
-    private void createConfirmDialog(DialogInterface.OnClickListener listener) {
-        final AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+    private void createConfirmDialog(Context context, DialogInterface.OnClickListener listener) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
                 .setTitle(R.string.confirm_dialog_title)
                 .setMessage(R.string.confirm_dialog_body_save)
                 .setPositiveButton(R.string.dialog_button_yes, listener)
@@ -174,7 +178,7 @@ public class NoteEditFragment extends Fragment {
      * @param isFromMenuItemPressed     boolean flag to differentiate if the method call was made
      *                                  either from pressing back button or from the menu save item
      */
-    public void showConfirmSaveDialog(boolean isFromMenuItemPressed) {
+    public void showConfirmSaveDialog(Context context, boolean isFromMenuItemPressed) {
         if (mNewNote) {
             if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()){
                 if (mNote.getBody() == null || mNote.getBody().trim().isEmpty()) {
@@ -205,7 +209,7 @@ public class NoteEditFragment extends Fragment {
                         }
                     };
 
-                    createConfirmDialog(listener);
+                    createConfirmDialog(context, listener);
 
                 }
             } else {
@@ -228,7 +232,7 @@ public class NoteEditFragment extends Fragment {
                     }
                 };
 
-                createConfirmDialog(listener);
+                createConfirmDialog(context, listener);
             }
         } else {
             if (mNote.getTitle().trim().isEmpty()) {
@@ -256,7 +260,7 @@ public class NoteEditFragment extends Fragment {
                         }
                     };
 
-                    createConfirmDialog(listener);
+                    createConfirmDialog(context, listener);
                 }
             } else {
                 if (mUpdated) {
@@ -279,7 +283,7 @@ public class NoteEditFragment extends Fragment {
                         }
                     };
 
-                    createConfirmDialog(listener);
+                    createConfirmDialog(context, listener);
                 } else {
                     // If the old note is not updated via field widgets,
                     // exit this fragment and do not save in database
@@ -350,7 +354,7 @@ public class NoteEditFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_save_note :
-                showConfirmSaveDialog(true);
+                showConfirmSaveDialog(getActivity(), true);
                 return true;
 
             default:
