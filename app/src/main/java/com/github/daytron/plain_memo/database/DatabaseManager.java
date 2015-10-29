@@ -10,10 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by ryan on 27/10/15.
  */
-public abstract class DatabaseManager {
+abstract class DatabaseManager {
 
-    abstract public void onCreate(SQLiteDatabase db);
-    abstract public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
+    protected abstract void onCreate(SQLiteDatabase db);
+    protected abstract void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
 
     static private class DBOpenHelper extends SQLiteOpenHelper {
 
@@ -93,7 +93,7 @@ public abstract class DatabaseManager {
      *               is not required and any file extension you would like to use is fine.
      * @param dbVersion the database version.
      */
-    public DatabaseManager(Context appContext, String dbName, int dbVersion) {
+    DatabaseManager(Context appContext, String dbName, int dbVersion) {
         String dbPath = appContext.getApplicationContext().getDatabasePath(dbName).getAbsolutePath();
         synchronized (lockObject) {
             sqLiteOpenHelper = dbMap.get(dbPath);

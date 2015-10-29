@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Created by ryan on 27/10/15.
  */
-public class NoteCursorWrapper extends CursorWrapper {
+class NoteCursorWrapper extends CursorWrapper {
 
     public NoteCursorWrapper(Cursor cursor) {
         super(cursor);
