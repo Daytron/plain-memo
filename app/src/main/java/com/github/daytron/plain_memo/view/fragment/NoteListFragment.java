@@ -164,17 +164,6 @@ public class NoteListFragment extends Fragment {
     }
 
     /**
-     * Called when the Fragment is no longer started.  This is generally
-     * tied to {@link Activity#onStop() Activity.onStop} of the containing
-     * Activity's lifecycle.
-     */
-    @Override
-    public void onStop() {
-        super.onStop();
-
-    }
-
-    /**
      * Called when the fragment is no longer in use.  This is called
      * after {@link #onStop()} and before {@link #onDetach()}.
      */
@@ -192,9 +181,9 @@ public class NoteListFragment extends Fragment {
 
         private Note mNote;
 
-        private TextView mTitleTextView;
-        private TextView mDateTextView;
-        private TextView mTimeTextView;
+        private final TextView mTitleTextView;
+        private final TextView mDateTextView;
+        private final TextView mTimeTextView;
 
         public NoteHolder(View itemView) {
             super(itemView);

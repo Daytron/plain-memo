@@ -294,16 +294,6 @@ public class NoteEditFragment extends Fragment {
         }
     }
 
-    /**
-     * Called when the Fragment is no longer resumed.  This is generally
-     * tied to {@link Activity#onPause() Activity.onPause} of the containing
-     * Activity's lifecycle.
-     */
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
     private void sendResult(int resultCode, boolean forDeletion) {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_NOTE_FOR_DELETION, forDeletion);
