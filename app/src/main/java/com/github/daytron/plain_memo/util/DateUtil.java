@@ -3,7 +3,6 @@ package com.github.daytron.plain_memo.util;
 import android.content.Context;
 import android.text.format.DateFormat;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**

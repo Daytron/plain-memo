@@ -1,8 +1,6 @@
 package com.github.daytron.plain_memo.view.fragment;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -14,7 +12,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,7 +37,6 @@ import java.util.List;
 public class NoteListFragment extends Fragment {
 
     private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
-    private static final int REQUEST_NOTE = 1;
 
     private LinearLayout mContentLinearLayout;
     private TextView mEmptyTextView;
@@ -115,8 +111,7 @@ public class NoteListFragment extends Fragment {
                 Note note = new Note();
                 NoteBook.get(getActivity()).addNote(note);
 
-                boolean isNewNote = true;
-                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), isNewNote);
+                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), true);
                 startActivity(intent);
             }
         });
