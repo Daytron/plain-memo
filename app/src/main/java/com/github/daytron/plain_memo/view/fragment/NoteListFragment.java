@@ -164,6 +164,17 @@ public class NoteListFragment extends Fragment {
     }
 
     /**
+     * Called when the Fragment is no longer resumed.  This is generally
+     * tied to {@link Activity#onPause() Activity.onPause} of the containing
+     * Activity's lifecycle.
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        isDBClose = NoteBook.get(getActivity()).closeDB();
+    }
+
+    /**
      * Called when the fragment is no longer in use.  This is called
      * after {@link #onStop()} and before {@link #onDetach()}.
      */
