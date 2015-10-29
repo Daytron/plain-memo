@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -180,8 +181,10 @@ public class NoteEditFragment extends Fragment {
             if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()){
                 if (mNote.getBody() == null || mNote.getBody().trim().isEmpty()) {
                     if (isFromMenuItemPressed) {
-                        Toast.makeText(getActivity(),R.string.toast_title_empty,
-                                Toast.LENGTH_SHORT).show();
+                        Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
+                                Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, -50);
+                        toast.show();
                     } else {
                         sendResult(Activity.RESULT_CANCELED, true);
                         getActivity().finish();
@@ -193,8 +196,11 @@ public class NoteEditFragment extends Fragment {
                             switch (which) {
                                 case DialogInterface.BUTTON_POSITIVE:
                                     dialog.cancel();
-                                    Toast.makeText(getActivity(), R.string.toast_title_empty,
-                                            Toast.LENGTH_SHORT).show();
+
+                                    Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
+                                            Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, -50);
+                                    toast.show();
                                     break;
                                 case DialogInterface.BUTTON_NEGATIVE:
                                     sendResult(Activity.RESULT_CANCELED, true);
@@ -243,8 +249,12 @@ public class NoteEditFragment extends Fragment {
                             switch (which) {
                                 case DialogInterface.BUTTON_POSITIVE:
                                     dialog.cancel();
-                                    Toast.makeText(getActivity(), R.string.toast_title_empty,
-                                            Toast.LENGTH_SHORT).show();
+
+                                    Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
+                                            Toast.LENGTH_SHORT);
+                                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, -50);
+                                    toast.show();
+
                                     break;
                                 case DialogInterface.BUTTON_NEGATIVE:
                                     sendResult(Activity.RESULT_CANCELED, false);
@@ -299,8 +309,6 @@ public class NoteEditFragment extends Fragment {
         });
         getActivity().setResult(resultCode, intent);
     }
-
-
 
     /**
      * Initialize the contents of the Activity's standard options menu.  You
