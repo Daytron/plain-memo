@@ -195,6 +195,9 @@ public class NoteEditFragment extends Fragment {
                                     Toast.makeText(getActivity(), R.string.toast_title_empty,
                                             Toast.LENGTH_SHORT).show();
                                     break;
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    sendResult(Activity.RESULT_CANCELED, true);
+                                    getActivity().finish();
                                 default:
                                     dialog.cancel();
                                     break;
