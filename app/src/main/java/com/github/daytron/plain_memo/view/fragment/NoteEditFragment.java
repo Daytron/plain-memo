@@ -159,8 +159,8 @@ public class NoteEditFragment extends Fragment {
         final AlertDialog alertDialog = new AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
                 .setTitle(R.string.confirm_dialog_save_title)
                 .setMessage(R.string.confirm_dialog_save_body)
-                .setPositiveButton(R.string.dialog_button_yes, listener)
-                .setNegativeButton(R.string.dialog_button_no, listener)
+                .setPositiveButton(R.string.dialog_button_save, listener)
+                .setNegativeButton(R.string.dialog_button_delete, listener)
                 .setNeutralButton(android.R.string.cancel,listener)
                 .create();
         alertDialog.show();

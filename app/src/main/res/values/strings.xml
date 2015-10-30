@@ -28,6 +28,7 @@
     <string name="confirm_dialog_delete_body">Delete the note </string>
     <string name="dialog_button_yes">Yes</string>
     <string name="dialog_button_no">No</string>
+    <string name="dialog_button_save">Save</string>
     <string name="dialog_button_delete">Delete</string>
     
     <!-- Toast -->
