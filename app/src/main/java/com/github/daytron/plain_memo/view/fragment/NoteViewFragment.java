@@ -67,12 +67,27 @@ public class NoteViewFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UUID noteId = (UUID) getArguments().getSerializable(ARG_NOTE_ID);
 
+        UUID noteId = (UUID) getArguments().getSerializable(ARG_NOTE_ID);
         mNote = NoteBook.get(getActivity()).getNote(noteId);
         setHasOptionsMenu(true);
 
-        mNewNote = getArguments().getBoolean(ARG_NOTE_IS_NEW);
+        if (savedInstanceState != null) {
+            // Retrieve old value of mNewNote when this view is recreated
+            // This is used again when this fragment came back to top stack
+            // when user press back button from NoteEditFragment
+            // IMPORTANT flag to prevent triggering callEditFragment() method in
+            // onResume when this fragment comes back on view
+            // Ideally the fragment object is save in the stack when on same orientation
+            // so no need to save this at all
+            // But problem arise if orientation is changed, all views are recreated thus
+            // the need to save this boolean value
+            mNewNote = savedInstanceState.getBoolean(ARG_NOTE_IS_NEW);
+        } else {
+            // Retrieve mNewNote from previous fragment (NoteListFragment)
+            // for the first time
+            mNewNote = getArguments().getBoolean(ARG_NOTE_IS_NEW);
+        }
     }
 
     /**
@@ -139,6 +154,12 @@ public class NoteViewFragment extends Fragment {
         mDateTextView.setText(dateText);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(ARG_NOTE_IS_NEW,mNewNote);
+    }
+
     /**
      * Receive the result from a previous call to
      * {@link #startActivityForResult(Intent, int)}.  This follows the
@@ -183,7 +204,6 @@ public class NoteViewFragment extends Fragment {
                 NoteBook.get(getActivity()).updateNote(mNote);
             }
         }
-
     }
 
     /**
@@ -233,7 +253,6 @@ public class NoteViewFragment extends Fragment {
                 noteBook.deleteNote(mNote);
                 getActivity().finish();
                 return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -243,4 +262,5 @@ public class NoteViewFragment extends Fragment {
         Intent intent = NoteEditActivity.newIntent(getActivity(), mNote.getID(), isNewNote);
         startActivityForResult(intent, REQUEST_NOTE_EDIT);
     }
+
 }
