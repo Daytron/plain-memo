@@ -31,6 +31,7 @@
     <string name="dialog_button_delete">Delete</string>
     
     <!-- Toast -->
+    <string name="toast_note_save">The note has been saved</string>
     <string name="toast_note_deletion">The note has been deleted</string>
     <string name="toast_title_empty">Please enter a title</string>
 </resources>

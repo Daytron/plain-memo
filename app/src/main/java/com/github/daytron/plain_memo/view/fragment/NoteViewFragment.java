@@ -186,6 +186,8 @@ public class NoteViewFragment extends Fragment {
                 if (isForDeletion) {
                     NoteBook.get(getActivity()).deleteNote(mNote);
                     getActivity().finish();
+                    Toast.makeText(getActivity(), R.string.toast_note_deletion,
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         } else if (resultCode == Activity.RESULT_OK) {
@@ -205,6 +207,9 @@ public class NoteViewFragment extends Fragment {
 
                 // Update database
                 NoteBook.get(getActivity()).updateNote(mNote);
+
+                Toast.makeText(getActivity(), R.string.toast_note_save,
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }
