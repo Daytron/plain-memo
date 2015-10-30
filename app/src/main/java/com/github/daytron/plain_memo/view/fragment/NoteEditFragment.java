@@ -157,8 +157,8 @@ public class NoteEditFragment extends Fragment {
      */
     private void createConfirmDialog(Context context, DialogInterface.OnClickListener listener) {
         final AlertDialog alertDialog = new AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
-                .setTitle(R.string.confirm_dialog_title)
-                .setMessage(R.string.confirm_dialog_body_save)
+                .setTitle(R.string.confirm_dialog_save_title)
+                .setMessage(R.string.confirm_dialog_save_body)
                 .setPositiveButton(R.string.dialog_button_yes, listener)
                 .setNegativeButton(R.string.dialog_button_no, listener)
                 .setNeutralButton(android.R.string.cancel,listener)
