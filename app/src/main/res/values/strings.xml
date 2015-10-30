@@ -22,10 +22,15 @@
     <string name="today">Today</string>
 
     <!-- Confirmation dialog -->
-    <string name="confirm_dialog_title">Confirm Action</string>
-    <string name="confirm_dialog_body_save">Do you want to save this note?</string>d
+    <string name="confirm_dialog_save_title">Confirm Save</string>
+    <string name="confirm_dialog_delete_title">Confirm Deletion</string>
+    <string name="confirm_dialog_save_body">Save the note?</string>
+    <string name="confirm_dialog_delete_body">Delete the note </string>
     <string name="dialog_button_yes">Yes</string>
     <string name="dialog_button_no">No</string>
-
+    <string name="dialog_button_delete">Delete</string>
+    
+    <!-- Toast -->
+    <string name="toast_note_deletion">The note has been deleted</string>
     <string name="toast_title_empty">Please enter a title</string>
 </resources>

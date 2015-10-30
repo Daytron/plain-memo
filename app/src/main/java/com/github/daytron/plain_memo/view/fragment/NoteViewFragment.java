@@ -1,10 +1,12 @@
 package com.github.daytron.plain_memo.view.fragment;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
@@ -157,7 +160,7 @@ public class NoteViewFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ARG_NOTE_IS_NEW,mNewNote);
+        outState.putBoolean(ARG_NOTE_IS_NEW, mNewNote);
     }
 
     /**
@@ -249,9 +252,7 @@ public class NoteViewFragment extends Fragment {
                 callEditFragment(false);
                 return true;
             case R.id.menu_item_delete_note :
-                NoteBook noteBook = NoteBook.get(getActivity());
-                noteBook.deleteNote(mNote);
-                getActivity().finish();
+                showConfirmDeleteDialog();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -261,6 +262,33 @@ public class NoteViewFragment extends Fragment {
     private void callEditFragment(boolean isNewNote) {
         Intent intent = NoteEditActivity.newIntent(getActivity(), mNote.getID(), isNewNote);
         startActivityForResult(intent, REQUEST_NOTE_EDIT);
+    }
+
+    private void showConfirmDeleteDialog() {
+        String msgBody = getString(R.string.confirm_dialog_delete_body)
+                + " \"" + mNote.getTitle() + "\"?";
+
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(),R.style.MyAlertDialogStyle)
+                .setTitle(R.string.confirm_dialog_delete_title)
+                .setMessage(msgBody)
+                .setPositiveButton(R.string.dialog_button_delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        NoteBook noteBook = NoteBook.get(getActivity());
+                        noteBook.deleteNote(mNote);
+                        getActivity().finish();
+                        Toast.makeText(getActivity(),R.string.toast_note_deletion,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .create();
+        dialog.show();
     }
 
 }
