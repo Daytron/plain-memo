@@ -39,7 +39,6 @@ public class NoteBook {
 
     public List<Note> getNotes() {
         List<Note> notes = new ArrayList<>();
-
         NoteCursorWrapper cursor = queryAllNotes(null,null);
 
         try {
@@ -70,9 +69,9 @@ public class NoteBook {
     }
 
     public Note getNote(UUID uuid) {
+        String whereClause = NoteTable.Cols.UUID + " = ?";
         NoteCursorWrapper cursor = queryAllNotes(
-                NoteTable.Cols.UUID + " = ?",
-                new String[]{uuid.toString()}
+                whereClause, new String[]{uuid.toString()}
         );
 
         try {
@@ -120,7 +119,7 @@ public class NoteBook {
                 new String[]{uuidString});
     }
 
-    public boolean closeDB() {
+    public boolean closeDatabase() {
         return notesDbManager.close();
     }
 }

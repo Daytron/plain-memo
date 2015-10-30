@@ -73,10 +73,11 @@ public class NoteEditFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         UUID noteId = (UUID) getArguments().getSerializable(ARG_NOTE_EDIT_ID);
         mNewNote = getArguments().getBoolean(ARG_NOTE_IS_NEW);
-
         mNote = NoteBook.get(getActivity()).getNote(noteId);
+
         setHasOptionsMenu(true);
     }
 
@@ -100,21 +101,20 @@ public class NoteEditFragment extends Fragment {
      */
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mUpdated = false;
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_note_edit,container,false);
 
         mTitleField = (EditText) v.findViewById(R.id.note_title_edit_text);
         mTitleField.setText(mNote.getTitle());
 
         mBodyField = (EditText) v.findViewById(R.id.note_body_edit_text);
-        mBodyField.setAllCaps(false);
         mBodyField.setText(mNote.getBody());
+        mBodyField.setAllCaps(false);
 
         mTitleField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -125,14 +125,12 @@ public class NoteEditFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
 
         mBodyField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -143,7 +141,6 @@ public class NoteEditFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
 
@@ -213,7 +210,6 @@ public class NoteEditFragment extends Fragment {
                     };
 
                     createConfirmDialog(context, listener);
-
                 }
             } else {
                 DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -254,7 +250,6 @@ public class NoteEditFragment extends Fragment {
                                             Toast.LENGTH_SHORT);
                                     toast.setGravity(Gravity.CENTER_VERTICAL, 0, -50);
                                     toast.show();
-
                                     break;
                                 case DialogInterface.BUTTON_NEGATIVE:
                                     sendResult(Activity.RESULT_CANCELED, false);
@@ -304,7 +299,7 @@ public class NoteEditFragment extends Fragment {
     private void sendResult(int resultCode, boolean forDeletion) {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_NOTE_FOR_DELETION, forDeletion);
-        intent.putExtra(EXTRA_NOTE_STRING_VALUES, new String[] {
+        intent.putExtra(EXTRA_NOTE_STRING_VALUES, new String[]{
                 mNote.getTitle(), mNote.getBody()
         });
         getActivity().setResult(resultCode, intent);
@@ -351,7 +346,6 @@ public class NoteEditFragment extends Fragment {
             case R.id.menu_item_save_note :
                 showConfirmSaveDialog(getActivity(), true);
                 return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }

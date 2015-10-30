@@ -1,5 +1,6 @@
 package com.github.daytron.plain_memo.view.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -106,8 +107,6 @@ public class NoteListFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
                 Note note = new Note();
                 NoteBook.get(getActivity()).addNote(note);
 
@@ -121,7 +120,6 @@ public class NoteListFragment extends Fragment {
         }
 
         updateUI();
-
         return view;
     }
 
@@ -166,7 +164,7 @@ public class NoteListFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        isDBClose = NoteBook.get(getActivity()).closeDB();
+        isDBClose = NoteBook.get(getActivity()).closeDatabase();
     }
 
     /**
@@ -176,9 +174,10 @@ public class NoteListFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        // Make sure to close database, since onPause is not always
+        // guaranteed to be called.
         if (!isDBClose) {
-            NoteBook.get(getActivity()).closeDB();
+            NoteBook.get(getActivity()).closeDatabase();
         }
     }
 
@@ -235,8 +234,8 @@ public class NoteListFragment extends Fragment {
         }
 
         /**
-         * Called when RecyclerView needs a new {@link ViewHolder} of the given type to represent
-         * an item.
+         * Called when RecyclerView needs a new {@link android.support.v7.widget.RecyclerView.ViewHolder}
+         * of the given type to represent an item.
          * <p/>
          * This new ViewHolder should be constructed with a new View that can represent the items
          * of the given type. You can either create a new View manually or inflate it from an XML
