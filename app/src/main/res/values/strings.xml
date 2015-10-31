@@ -25,6 +25,7 @@
     <string name="note_solved_label">Solved</string>
 
     <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
 
     <!-- Confirmation dialog -->
     <string name="confirm_dialog_save_title">Confirm Save</string>

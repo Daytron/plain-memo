@@ -2,10 +2,8 @@ package com.github.daytron.plain_memo.view.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,9 +28,9 @@ import com.github.daytron.plain_memo.NoteListActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
-import com.github.daytron.plain_memo.util.DateUtil;
 import com.github.daytron.plain_memo.view.NotePagerActivity;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -45,9 +44,6 @@ public class NoteListFragment extends Fragment {
     private TextView mEmptyTextView;
     private RecyclerView mNoteRecyclerView;
     private NoteListAdapter mAdapter;
-    private CollapsingToolbarLayout mToolbarLayout;
-    private TextView mToolbarTitle;
-    private TextView mToolbarSubtitle;
 
     private boolean mSubtitleVisible;
     private boolean isDBClose = false;
@@ -193,37 +189,69 @@ public class NoteListFragment extends Fragment {
 
         private final TextView mTitleTextView;
         private final TextView mDateTextView;
-        //private final TextView mTimeTextView;
+
+        private Calendar mNoteCalendar;
+        private final Calendar mYesterday;
+        private final Calendar mDayMinus2;
+        private final Calendar mDayMinus8;
 
         public NoteHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
 
-//            String fontOpenSansRegular = "fonts/OpenSans-Regular.ttf";
-//            String fontOpenSansLight = "fonts/OpenSans-Light.ttf";
-//            Typeface tfReg = Typeface.createFromAsset(getActivity().getAssets(), fontOpenSansRegular);
-//            Typeface tfLight = Typeface.createFromAsset(getActivity().getAssets(), fontOpenSansLight);
-
             mTitleTextView = (TextView) itemView.findViewById(R.id.list_item_note_title_text_view);
-            //mTitleTextView.setTypeface(tfReg);
             mDateTextView = (TextView) itemView.findViewById(R.id.list_item_note_date_text_view);
-            //mDateTextView.setTypeface(tfLight);
-            //mTimeTextView = (TextView) itemView.findViewById(R.id.list_item_note_time_text_view);
-            //mTimeTextView.setTypeface(tfLight);
+
+            mYesterday = Calendar.getInstance();
+            mYesterday.add(Calendar.DAY_OF_YEAR, -1);
+
+            mDayMinus2 = Calendar.getInstance();
+            mDayMinus2.add(Calendar.DAY_OF_YEAR, -1);
+            mDayMinus2.set(Calendar.HOUR_OF_DAY, 0);
+            mDayMinus2.set(Calendar.MINUTE, 0);
+            mDayMinus2.set(Calendar.SECOND, 0);
+            mDayMinus2.set(Calendar.MILLISECOND, 0);
+
+            mDayMinus8 = Calendar.getInstance();
+            mDayMinus8.add(Calendar.DAY_OF_MONTH, -8);
+            mDayMinus8.set(Calendar.HOUR_OF_DAY, 0);
+            mDayMinus8.set(Calendar.MINUTE, 0);
+            mDayMinus8.set(Calendar.SECOND, 0);
+            mDayMinus8.set(Calendar.MILLISECOND, 0);
         }
 
         public void bindCrime(Note note) {
             mNote = note;
             mTitleTextView.setText(mNote.getTitle());
 
-            if (DateUtils.isToday(mNote.getDate().getTime())) {
-                mDateTextView.setText(R.string.today);
+            mNoteCalendar = Calendar.getInstance();
+            mNoteCalendar.setTime(mNote.getDate());
+
+            if (DateUtils.isToday(mNote.getDate().getTime())){
+                mDateTextView.setText(
+                        DateUtils.formatDateTime(getActivity(),mNote.getDate().getTime(),
+                                DateUtils.FORMAT_SHOW_TIME)
+                );
+            } else if (mNoteCalendar.get(Calendar.YEAR) == mYesterday.get(Calendar.YEAR)
+                && mNoteCalendar.get(Calendar.DAY_OF_YEAR) == mYesterday.get(Calendar.DAY_OF_YEAR)) {
+                mDateTextView.setText(R.string.yesterday);
+            } else if (mNoteCalendar.before(mDayMinus2) && mNoteCalendar.after(mDayMinus8)) {
+                mDateTextView.setText(
+                        DateUtils.formatDateTime(getActivity(),mNote.getDate().getTime(),
+                                DateUtils.FORMAT_SHOW_WEEKDAY |
+                                DateUtils.FORMAT_ABBREV_WEEKDAY)
+                );
+            } else if (mNoteCalendar.get(Calendar.YEAR) == Calendar.getInstance()
+                    .get(Calendar.YEAR)) {
+                mDateTextView.setText(
+                        DateUtils.formatDateTime(getActivity(),mNote.getDate().getTime(),
+                                DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_NO_YEAR)
+                );
             } else {
-                mDateTextView.setText(DateUtil.getDateStringLocale(getActivity(),
-                        mNote.getDate()));
+                mDateTextView.setText(
+                        DateFormat.getDateFormat(getActivity()).format(mNote.getDate())
+                );
             }
-            //mTimeTextView.setText(DateUtil.getTimeStringLocale(getActivity(),
-            //        mNote.getDate()));
         }
 
         /**
