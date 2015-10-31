@@ -9,6 +9,8 @@ import com.github.daytron.plain_memo.view.fragment.NoteEditFragment;
 
 import java.util.UUID;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 /**
  * Created by ryan on 28/10/15.
  */
@@ -47,5 +49,10 @@ public class NoteEditActivity extends SingleFragmentActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 }

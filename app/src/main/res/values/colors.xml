@@ -10,9 +10,9 @@
 
     <!--
     First 2 values represent opacity in hex (base16)
-    For 87% opacity: 0.87 * 255 = 222 (DE in hex)
+    For 80% opacity: 0.8 * 255 = 204 (CC in hex)
     -->
-    <color name="colorFontNormal">#DE000000</color>
+    <color name="colorFontNormal">#CC000000</color>
 
     <!-- 66% opacity (170 or AA in hex) -->
     <color name="colorFontSub">#AA000000</color>

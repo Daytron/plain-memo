@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
         android:paddingLeft="@dimen/note_list_margin_left_right"
         android:paddingRight="@dimen/note_list_margin_left_right">
 
@@ -21,31 +21,22 @@
             android:layout_height="wrap_content"
             android:layout_weight="3.5"
             android:textSize="18sp"
+            android:paddingTop="5dp"
+            tools:ignore="MissingPrefix"
+            fontPath="fonts/OpenSans-Regular.ttf"
             android:textColor="@color/colorFontNormal"
-            android:paddingTop="7dp"
             tools:text="Crime Title"/>
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/list_item_note_date_text_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            tools:ignore="MissingPrefix"
+            fontPath="fonts/OpenSans-Light.ttf"
+            android:textColor="@color/colorFontNormal"
+            tools:text="11:05 am"/>
 
-            <TextView
-                android:id="@+id/list_item_note_date_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorFontSub"
-                tools:text="Crime Date"/>
-
-            <TextView
-                android:id="@+id/list_item_note_time_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorFontSub"
-                tools:text="09:12 am"/>
-
-        </LinearLayout>
     </LinearLayout>
 
     <View

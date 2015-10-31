@@ -2,8 +2,10 @@ package com.github.daytron.plain_memo.view.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -43,8 +45,11 @@ public class NoteListFragment extends Fragment {
     private TextView mEmptyTextView;
     private RecyclerView mNoteRecyclerView;
     private NoteListAdapter mAdapter;
-    private boolean mSubtitleVisible;
+    private CollapsingToolbarLayout mToolbarLayout;
+    private TextView mToolbarTitle;
+    private TextView mToolbarSubtitle;
 
+    private boolean mSubtitleVisible;
     private boolean isDBClose = false;
 
     /**
@@ -188,15 +193,23 @@ public class NoteListFragment extends Fragment {
 
         private final TextView mTitleTextView;
         private final TextView mDateTextView;
-        private final TextView mTimeTextView;
+        //private final TextView mTimeTextView;
 
         public NoteHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
 
+//            String fontOpenSansRegular = "fonts/OpenSans-Regular.ttf";
+//            String fontOpenSansLight = "fonts/OpenSans-Light.ttf";
+//            Typeface tfReg = Typeface.createFromAsset(getActivity().getAssets(), fontOpenSansRegular);
+//            Typeface tfLight = Typeface.createFromAsset(getActivity().getAssets(), fontOpenSansLight);
+
             mTitleTextView = (TextView) itemView.findViewById(R.id.list_item_note_title_text_view);
+            //mTitleTextView.setTypeface(tfReg);
             mDateTextView = (TextView) itemView.findViewById(R.id.list_item_note_date_text_view);
-            mTimeTextView = (TextView) itemView.findViewById(R.id.list_item_note_time_text_view);
+            //mDateTextView.setTypeface(tfLight);
+            //mTimeTextView = (TextView) itemView.findViewById(R.id.list_item_note_time_text_view);
+            //mTimeTextView.setTypeface(tfLight);
         }
 
         public void bindCrime(Note note) {
@@ -209,8 +222,8 @@ public class NoteListFragment extends Fragment {
                 mDateTextView.setText(DateUtil.getDateStringLocale(getActivity(),
                         mNote.getDate()));
             }
-            mTimeTextView.setText(DateUtil.getTimeStringLocale(getActivity(),
-                    mNote.getDate()));
+            //mTimeTextView.setText(DateUtil.getTimeStringLocale(getActivity(),
+            //        mNote.getDate()));
         }
 
         /**
@@ -401,7 +414,6 @@ public class NoteListFragment extends Fragment {
 
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         ActionBar actionBar = activity.getSupportActionBar();
-
         if (actionBar != null) actionBar.setSubtitle(subtitle);
     }
 }
