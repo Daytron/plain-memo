@@ -9,9 +9,14 @@
     <string name="save_note">Save</string>
     <string name="delete_note">Delete</string>
     <string name="cancel_note">Cancel</string>
-    <string name="show_subtitle">Show Subtitle</string>
-    <string name="hide_subtitle">Hide Subtitle</string>
-    <string name="subtitle_format">%1$s crimes</string>
+    <string name="show_no_of_notes_subtitle">Show Notes Count</string>
+    <string name="hide_no_of_notes_subtitle">Hide Notes Count</string>
+    <string name="subtitle_format">%1$s notes</string>
+
+    <plurals name="subtitle_plural">
+        <item quantity="one">%1$s note</item>
+        <item quantity="other">%1$s notes</item>
+    </plurals>
 
     <string name="note_title_label">Title</string>
     <string name="note_title_hint">Enter a title for the note</string>

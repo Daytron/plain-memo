@@ -334,11 +334,11 @@ public class NoteListFragment extends Fragment {
 
         inflater.inflate(R.menu.fragment_note_list, menu);
 
-        MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_subtitle);
+        MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_number_notes_subtitle);
         if (mSubtitleVisible) {
-            subtitleItem.setTitle(R.string.hide_subtitle);
+            subtitleItem.setTitle(R.string.hide_no_of_notes_subtitle);
         } else {
-            subtitleItem.setTitle(R.string.show_subtitle);
+            subtitleItem.setTitle(R.string.show_no_of_notes_subtitle);
         }
     }
 
@@ -391,7 +391,7 @@ public class NoteListFragment extends Fragment {
                 Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), true);
                 startActivity(intent);
                 return true;
-            case R.id.menu_item_show_subtitle:
+            case R.id.menu_item_show_number_notes_subtitle:
                 mSubtitleVisible = !mSubtitleVisible;
                 getActivity().supportInvalidateOptionsMenu();
                 updateSubtitle();
@@ -406,7 +406,8 @@ public class NoteListFragment extends Fragment {
     private void updateSubtitle() {
         NoteBook noteBook = NoteBook.get(getActivity());
         int noteCount = noteBook.getNotes().size();
-        String subtitle = getString(R.string.subtitle_format, noteCount);
+        String subtitle = getResources().getQuantityString(R.plurals.subtitle_plural,
+                noteCount, noteCount);
 
         if (!mSubtitleVisible) {
             subtitle = null;
