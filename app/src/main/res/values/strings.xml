@@ -9,6 +9,7 @@
     <string name="save_note">Save</string>
     <string name="delete_note">Delete</string>
     <string name="cancel_note">Cancel</string>
+    <string name="search_note">Search</string>
     <string name="show_no_of_notes_subtitle">Show Notes Count</string>
     <string name="hide_no_of_notes_subtitle">Hide Notes Count</string>
     <string name="subtitle_format">%1$s notes</string>

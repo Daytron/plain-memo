@@ -7,10 +7,12 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -30,13 +32,14 @@ import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
 import com.github.daytron.plain_memo.view.NotePagerActivity;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 /**
  * Created by ryan on 27/10/15.
  */
-public class NoteListFragment extends Fragment {
+public class NoteListFragment extends Fragment implements SearchView.OnQueryTextListener {
 
     private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
 
@@ -44,6 +47,7 @@ public class NoteListFragment extends Fragment {
     private TextView mEmptyTextView;
     private RecyclerView mNoteRecyclerView;
     private NoteListAdapter mAdapter;
+    private List<Note> mListOfNotes;
 
     private boolean mSubtitleVisible;
     private boolean isDBClose = false;
@@ -119,6 +123,9 @@ public class NoteListFragment extends Fragment {
         if (savedInstanceState != null) {
             mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
         }
+
+        NoteBook noteBook = NoteBook.get(getActivity());
+        mListOfNotes = noteBook.getNotes();
 
         updateUI();
         return view;
@@ -271,7 +278,7 @@ public class NoteListFragment extends Fragment {
         private List<Note> mNotes;
 
         public NoteListAdapter(List<Note> notes) {
-            mNotes = notes;
+            mNotes = new ArrayList<>(notes);
         }
 
         /**
@@ -324,7 +331,7 @@ public class NoteListFragment extends Fragment {
          */
         @Override
         public void onBindViewHolder(NoteHolder holder, int position) {
-            Note note = mNotes.get(position);
+            final Note note = mNotes.get(position);
             holder.bindCrime(note);
         }
 
@@ -340,6 +347,109 @@ public class NoteListFragment extends Fragment {
 
         public void setNotes(List<Note> notes) {
             mNotes = notes;
+        }
+
+        /**
+         * Remove a note from the list of notes with the given position.
+         *
+         * @param position The position in the list to remove the note.
+         * @return The removed note.
+         */
+        public Note removeItem(int position) {
+            final Note note = mNotes.remove(position);
+            notifyItemRemoved(position);
+            return note;
+        }
+
+        /**
+         * Add a note to the list of notes with the given position.
+         *
+         * @param position The position in the list to add the note.
+         * @param note The note to be added.
+         */
+        public void addItem(int position, Note note) {
+            mNotes.add(position, note);
+            notifyItemInserted(position);
+        }
+
+        /**
+         * Move note from the given fromPosition to toPosition in the notes container, mNotes.
+         *
+         * @param fromPosition The position to move from.
+         * @param toPosition The position to move to.
+         */
+        public void moveItem(int fromPosition, int toPosition) {
+            final Note note = mNotes.remove(fromPosition);
+            mNotes.add(toPosition, note);
+            notifyItemMoved(fromPosition, toPosition);
+        }
+
+        /**
+         * A convenience method to call the three move methods which are process in order. The order
+         * in which they are called is important. Unmatched notes are removed at first, then
+         * return/re-add any matched note that has been removed from previous action (e.g. different
+         * string query) to the list of notes and finally rearranged their positions according to
+         * the filtered list.
+         *
+         * @param notes The filtered list of notes as {@link List} object.
+         */
+        public void animateTo(List<Note> notes) {
+            applyAndAnimateRemovals(notes);
+            applyAndAnimateAdditions(notes);
+            applyAndAnimateMovedItems(notes);
+        }
+
+        /**
+         * Iterates through the filtered list and remove any unmatched note from the notes
+         * container, mNotes. Iterates starts from the bottom of the list going up to
+         * avoid the need to keep track of the offset when moving their positions later on.
+         *
+         * @param newModels The filtered list of notes as {@link List} object.
+         */
+        private void applyAndAnimateRemovals(List<Note> newModels) {
+            for (int i = mNotes.size() - 1; i >= 0; i--) {
+                final Note model = mNotes.get(i);
+                if (!newModels.contains(model)) {
+                    removeItem(i);
+                }
+            }
+        }
+
+        /**
+         * Iterates through the filtered list and verify that the notes container, mNotes
+         * does have the note from the filtered list. If not, add it to mNotes.
+         *
+         * @param newModels The filtered list of notes as {@link List} object.
+         */
+        private void applyAndAnimateAdditions(List<Note> newModels) {
+            for (int i = 0, count = newModels.size(); i < count; i++) {
+                final Note model = newModels.get(i);
+                if (!mNotes.contains(model)) {
+                    addItem(i, model);
+                }
+            }
+        }
+
+        /**
+         * Detects the difference between filtered notes and original notes in the position of
+         * the notes and move the note items from their original positions to their respective
+         * filtered positions.
+         *
+         * It is imperative to call this method after which {@link #applyAndAnimateRemovals(List)}
+         * and {@link #applyAndAnimateAdditions(List)} methods are called first. Moving notes
+         * without calling these methods first can be fatal to the whole operation of filtering.
+         *
+         * @param newModels The filtered list of notes that is needed to retrieve the required
+         *                  positions as {@link List} object.
+         */
+        private void applyAndAnimateMovedItems(List<Note> newModels) {
+            for (int toPosition = newModels.size() - 1; toPosition >= 0; toPosition--) {
+                final Note note = newModels.get(toPosition);
+                final int fromPosition = mNotes.indexOf(note);
+                if (fromPosition >= 0 && fromPosition != toPosition) {
+                    moveItem(fromPosition, toPosition);
+                }
+            }
         }
     }
 
@@ -368,6 +478,64 @@ public class NoteListFragment extends Fragment {
         } else {
             subtitleItem.setTitle(R.string.show_no_of_notes_subtitle);
         }
+
+        // Get the SearchView and set its listener
+        final MenuItem searchViewItem = menu.findItem(R.id.menu_item_search_note);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
+        searchView.setOnQueryTextListener(this);
+    }
+
+    /**
+     * Called when the user submits the query. This could be due to a key press on the
+     * keyboard or due to pressing a submit button.
+     * The listener can override the standard behavior by returning true
+     * to indicate that it has handled the submit request. Otherwise return false to
+     * let the SearchView handle the submission by launching any associated intent.
+     *
+     * @param query the query text that is to be submitted
+     * @return true if the query has been handled by the listener, false to let the
+     * SearchView perform the default action.
+     */
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    /**
+     * Called when the query text is changed by the user.
+     *
+     * @param newText the new content of the query text field.
+     * @return false if the SearchView should perform the default action of showing any
+     * suggestions if available, true if the action was handled by the listener.
+     */
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        final List<Note> filteredNotes = filter(mListOfNotes, newText);
+        mAdapter.animateTo(filteredNotes);
+        mNoteRecyclerView.scrollToPosition(0);
+        return true;
+    }
+
+    /**
+     * Filter the list based on the string entered by the user via {@link SearchView} widget
+     * in the toolbar. Filter only by letter and note case sensitive. Any letter match in the
+     * note's title is displayed in the filtered view.
+     *
+     * @param notes The list of notes to be filtered as {@link List} object.
+     * @param queryString The query search text as {@link String}.
+     * @return The filtered list as {@link List} object.
+     */
+    private List<Note> filter(List<Note> notes, String queryString) {
+        queryString = queryString.toLowerCase();
+
+        final List<Note> filteredNoteList = new ArrayList<>();
+        for (Note note : notes) {
+            final String titleText = note.getTitle().toLowerCase();
+            if (titleText.contains(queryString)) {
+                filteredNoteList.add(note);
+            }
+        }
+        return filteredNoteList;
     }
 
     /**
@@ -413,7 +581,7 @@ public class NoteListFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_new_crime:
+            case R.id.menu_item_new_note:
                 Note note = new Note();
                 NoteBook.get(getActivity()).addNote(note);
                 Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), true);
