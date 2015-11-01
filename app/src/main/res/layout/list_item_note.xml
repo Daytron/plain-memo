@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingTop="7dp"
-        android:paddingBottom="7dp"
+        android:paddingBottom="8dp"
         android:paddingLeft="@dimen/note_list_margin_left_right"
         android:paddingRight="@dimen/note_list_margin_left_right">
 
@@ -26,8 +26,8 @@
             android:drawablePadding="5dp"
             android:gravity="center_vertical"
             tools:ignore="MissingPrefix"
-            fontPath="fonts/OpenSans-Regular.ttf"
-            android:textColor="@color/colorFontNormal"
+            fontPath="fonts/OpenSans-Semibold.ttf"
+            android:textColor="@color/colorFontSemibold"
             tools:text="Crime Title"/>
 
         <TextView

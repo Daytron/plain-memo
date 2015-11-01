@@ -13,6 +13,8 @@
     For 80% opacity: 0.8 * 255 = 204 (CC in hex)
     -->
     <color name="colorFontNormal">#CC000000</color>
+    <!-- 0.7 * 255 = 179 (B3) -->
+    <color name="colorFontSemibold">#B3000000</color>
 
     <!-- 66% opacity (170 or AA in hex) -->
     <color name="colorFontSub">#AA000000</color>
