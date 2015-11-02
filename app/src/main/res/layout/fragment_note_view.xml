@@ -2,7 +2,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/note_view_root_linearlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackgroundNoteBody"
@@ -23,9 +22,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:textSize="@dimen/font_size_large"
             tools:ignore="MissingPrefix"
-            fontPath="fonts/OpenSans-Regular.ttf"
+            fontPath="fonts/OpenSans-Semibold.ttf"
             android:textColor="@color/colorFontNormal"
             tools:text="My note"/>
 
@@ -52,7 +50,6 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="20dp"
-        android:textSize="@dimen/font_size_medium"
         tools:ignore="MissingPrefix"
         fontPath="fonts/OpenSans-Regular.ttf"
         android:textColor="@color/colorFontNormal"

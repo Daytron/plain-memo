@@ -9,8 +9,8 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.text.Layout;
 import android.text.format.DateFormat;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,11 +18,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.daytron.plain_memo.R;
+import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
 import com.github.daytron.plain_memo.view.NoteEditActivity;
@@ -42,7 +42,6 @@ public class NoteViewFragment extends Fragment {
     private static final int REQUEST_NOTE_EDIT = 1;
 
     private Note mNote;
-    private LinearLayout rootLayoutView;
     private TextView mTitleTextView;
     private TextView mDateTextView;
     private TextView mBodyTextView;
@@ -126,12 +125,18 @@ public class NoteViewFragment extends Fragment {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mSingleTouchEdit = sharedPref
                 .getBoolean(getString(R.string.pref_appearance_single_tap_edit_key),true);
+        String selectedFontSize = sharedPref
+                .getString(getString(R.string.pref_appearance_font_size_key),
+                        String.valueOf(GlobalValues.FONT_SIZE_DEFAULT));
 
-        rootLayoutView = (LinearLayout) v.findViewById(R.id.note_view_root_linearlayout);
+        int valueSize = Integer.parseInt(selectedFontSize);
+        float fontSize = (float)valueSize;
 
         mTitleTextView = (TextView) v.findViewById(R.id.note_title_text_view);
         mTitleTextView.setAllCaps(false);
         mTitleTextView.setText(mNote.getTitle());
+        mTitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize +
+                GlobalValues.FONT_SIZE_DIFFERENCE);
         mTitleTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,6 +149,7 @@ public class NoteViewFragment extends Fragment {
         mBodyTextView = (TextView) v.findViewById(R.id.note_body_text_view);
         mBodyTextView.setAllCaps(false);
         mBodyTextView.setText(mNote.getBody());
+        mBodyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
         mBodyTextView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -153,7 +159,7 @@ public class NoteViewFragment extends Fragment {
                             TextView layout = ((TextView) v);
                             float x = event.getX() + mBodyTextView.getScrollX();
                             float y = event.getY() + mBodyTextView.getScrollY();
-                            long offset = layout.getOffsetForPosition(x,y);
+                            long offset = layout.getOffsetForPosition(x, y);
 
                             callEditFragment(false, offset);
                             break;
@@ -165,6 +171,8 @@ public class NoteViewFragment extends Fragment {
 
         mDateTextView = (TextView) v.findViewById(R.id.note_date_text_view);
         mDateTextView.setAllCaps(false);
+        mDateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,fontSize -
+                GlobalValues.FONT_SIZE_DIFFERENCE);
         mDateTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

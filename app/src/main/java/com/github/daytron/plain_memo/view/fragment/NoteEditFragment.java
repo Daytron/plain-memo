@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +24,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.github.daytron.plain_memo.R;
+import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
 
@@ -82,7 +86,6 @@ public class NoteEditFragment extends Fragment {
         mNote = NoteBook.get(getActivity()).getNote(noteId);
 
         mCursorBodyOffset = getArguments().getLong(ARG_NOTE_OFFSET);
-        String val = "offset value: " + mCursorBodyOffset;
 
         setHasOptionsMenu(true);
     }
@@ -111,22 +114,38 @@ public class NoteEditFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_note_edit, container, false);
 
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String selectedFontSize = sharedPref
+                .getString(getString(R.string.pref_appearance_font_size_key),
+                        String.valueOf(GlobalValues.FONT_SIZE_DEFAULT));
+
+        int valueSize = Integer.parseInt(selectedFontSize);
+        float fontSize = (float)valueSize;
+
         mTitleField = (EditText) v.findViewById(R.id.note_title_edit_text);
         mTitleField.setText(mNote.getTitle());
+        mTitleField.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
 
         mBodyField = (EditText) v.findViewById(R.id.note_body_edit_text);
         mBodyField.setText(mNote.getBody());
-        mBodyField.requestFocus();
+        mBodyField.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
         mBodyField.setAllCaps(false);
 
-        // Apply offset cursor position from NoteViewFragment
-        if (mCursorBodyOffset > 0) {
-            mBodyField.setSelection((int) mCursorBodyOffset);
+        if (mNewNote) {
+            mTitleField.requestFocus();
         } else {
-            // move cursor in the last position
-            // Default behaviour
-            mBodyField.setSelection(mBodyField.length());
+            mBodyField.requestFocus();
+            // Apply offset cursor position from NoteViewFragment
+            if (mCursorBodyOffset > 0) {
+                mBodyField.setSelection((int) mCursorBodyOffset);
+            } else {
+                // move cursor in the last position
+                // Default behaviour
+                mBodyField.setSelection(mBodyField.length());
+            }
         }
+
+
 
         mTitleField.addTextChangedListener(new TextWatcher() {
             @Override

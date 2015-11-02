@@ -18,6 +18,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 
 import com.github.daytron.plain_memo.NoteListActivity;
 import com.github.daytron.plain_memo.R;
+import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
 import com.github.daytron.plain_memo.settings.UserPreferenceActivity;
@@ -102,7 +104,17 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         mContentLinearLayout = (LinearLayout) view.findViewById(R.id.note_linear_layout_bg);
         mContentLinearLayout.setBackgroundColor(bgColor);
 
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String selectedFontSize = sharedPref
+                .getString(getString(R.string.pref_appearance_font_size_key),
+                        String.valueOf(GlobalValues.FONT_SIZE_DEFAULT));
+
+        int valueSize = Integer.parseInt(selectedFontSize);
+        float fontSize = (float)valueSize;
+
         mEmptyTextView = (TextView) view.findViewById(R.id.note_empty_text_view);
+        mEmptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((NoteListActivity)getActivity()).setSupportActionBar(toolbar);
 
@@ -230,6 +242,18 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
 
         public void bindCrime(Note note) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String selectedFontSize = sharedPref
+                    .getString(getString(R.string.pref_appearance_font_size_key),
+                            String.valueOf(GlobalValues.FONT_SIZE_DEFAULT));
+
+            int valueSize = Integer.parseInt(selectedFontSize);
+            float fontSize = (float)valueSize;
+
+            mTitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,fontSize);
+            mDateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,
+                    fontSize - GlobalValues.FONT_SIZE_DIFFERENCE);
+
             mNote = note;
             mTitleTextView.setText(mNote.getTitle());
 

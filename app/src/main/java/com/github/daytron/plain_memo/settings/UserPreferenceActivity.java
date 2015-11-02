@@ -1,18 +1,14 @@
 package com.github.daytron.plain_memo.settings;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.github.daytron.plain_memo.BuildConfig;
@@ -106,7 +102,7 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
             if (getString(R.string.pref_general).equals(settingsVal)) {
                 addPreferencesFromResource(R.xml.settings_general);
 
-                ((UserPreferenceActivity)getActivity())
+                ((UserPreferenceActivity) getActivity())
                         .getSupportActionBar()
                         .setTitle(getString(R.string.pref_general));
 
@@ -115,7 +111,7 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
             } else {
                 addPreferencesFromResource(R.xml.settings_appearance);
 
-                ((UserPreferenceActivity)getActivity())
+                ((UserPreferenceActivity) getActivity())
                         .getSupportActionBar()
                         .setTitle(getString(R.string.pref_appearance));
             }
@@ -173,7 +169,7 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             if (android.R.id.home == item.getItemId()) {
                 //  try one of these:
-                Toast.makeText(getActivity(),"Pumasok",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Pumasok", Toast.LENGTH_SHORT).show();
                 getActivity().dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
                 return true;
             }
@@ -218,7 +214,10 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
          */
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
+            if (key.equalsIgnoreCase(getString(R.string.pref_appearance_font_size_key))) {
+                Preference preference = findPreference(key);
+                preference.setSummary(((ListPreference)preference).getEntry());
+            }
         }
     }
 }

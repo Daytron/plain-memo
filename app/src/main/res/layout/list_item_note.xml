@@ -20,7 +20,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3.5"
-            android:textSize="@dimen/font_size_medium"
             android:paddingTop="5dp"
             android:drawableStart="@drawable/ic_file_document"
             android:drawablePadding="5dp"

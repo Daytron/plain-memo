@@ -10,11 +10,7 @@
     <string name="edit_note">Edit</string>
     <string name="save_note">Save</string>
     <string name="delete_note">Delete</string>
-    <string name="cancel_note">Cancel</string>
     <string name="search_note">Search</string>
-    <string name="show_no_of_notes_subtitle">Show Notes Count</string>
-    <string name="hide_no_of_notes_subtitle">Hide Notes Count</string>
-    <string name="subtitle_format">%1$s notes</string>
 
     <plurals name="subtitle_plural">
         <item quantity="one">%1$s note</item>
@@ -24,10 +20,7 @@
     <string name="note_title_label">Title</string>
     <string name="note_title_hint">Enter a title for the note</string>
     <string name="note_body_hint">Enter message</string>
-    <string name="note_body_label">Note</string>
-    <string name="note_solved_label">Solved</string>
 
-    <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
 
     <!-- Confirmation dialog -->
@@ -35,8 +28,6 @@
     <string name="confirm_dialog_delete_title">Confirm Deletion</string>
     <string name="confirm_dialog_save_body">Save the note?</string>
     <string name="confirm_dialog_delete_body">Delete the note </string>
-    <string name="dialog_button_yes">Yes</string>
-    <string name="dialog_button_no">No</string>
     <string name="dialog_button_save">Save</string>
     <string name="dialog_button_delete">Delete</string>
     
