@@ -20,18 +20,23 @@ public class NoteEditActivity extends SingleFragmentActivity {
             "com.github.daytron.plain_memo.note_edit_id";
     private static final String EXTRA_NOTE_IS_NEW =
             "com.github.daytron.plain_memo.note_is_new";
+    private static final String EXTRA_NOTE_TOUCH_OFFSET =
+            "com.github.daytron.plain_memo.note_touch_offset";
 
     @Override
     protected Fragment createFragment() {
         UUID noteId = (UUID) getIntent().getSerializableExtra(EXTRA_NOTE_EDIT_ID);
         boolean isNewNote = getIntent().getBooleanExtra(EXTRA_NOTE_IS_NEW, false);
-        return NoteEditFragment.newInstance(noteId, isNewNote);
+        long offset = getIntent().getLongExtra(EXTRA_NOTE_TOUCH_OFFSET,0);
+        return NoteEditFragment.newInstance(noteId, isNewNote, offset);
     }
 
-    public static Intent newIntent(Context packageContext,  UUID noteId, boolean isNewNote) {
+    public static Intent newIntent(Context packageContext,  UUID noteId, boolean isNewNote,
+                                   long offset) {
         Intent intent = new Intent(packageContext, NoteEditActivity.class);
         intent.putExtra(EXTRA_NOTE_EDIT_ID, noteId);
         intent.putExtra(EXTRA_NOTE_IS_NEW, isNewNote);
+        intent.putExtra(EXTRA_NOTE_TOUCH_OFFSET, offset);
         return intent;
     }
 

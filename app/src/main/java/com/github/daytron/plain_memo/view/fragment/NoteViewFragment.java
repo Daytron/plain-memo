@@ -3,17 +3,22 @@ package com.github.daytron.plain_memo.view.fragment;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Layout;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,11 +42,13 @@ public class NoteViewFragment extends Fragment {
     private static final int REQUEST_NOTE_EDIT = 1;
 
     private Note mNote;
+    private LinearLayout rootLayoutView;
     private TextView mTitleTextView;
     private TextView mDateTextView;
     private TextView mBodyTextView;
 
     private boolean mNewNote;
+    private boolean mSingleTouchEdit;
 
     public static NoteViewFragment newInstance(UUID noteId, boolean isNewNote) {
         Bundle args = new Bundle();
@@ -116,16 +123,56 @@ public class NoteViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_note_view,container,false);
 
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSingleTouchEdit = sharedPref
+                .getBoolean(getString(R.string.pref_appearance_single_tap_edit_key),true);
+
+        rootLayoutView = (LinearLayout) v.findViewById(R.id.note_view_root_linearlayout);
+
         mTitleTextView = (TextView) v.findViewById(R.id.note_title_text_view);
         mTitleTextView.setAllCaps(false);
         mTitleTextView.setText(mNote.getTitle());
+        mTitleTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mSingleTouchEdit) {
+                    callEditFragment(false, 0);
+                }
+            }
+        });
 
         mBodyTextView = (TextView) v.findViewById(R.id.note_body_text_view);
         mBodyTextView.setAllCaps(false);
         mBodyTextView.setText(mNote.getBody());
+        mBodyTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (mSingleTouchEdit) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            TextView layout = ((TextView) v);
+                            float x = event.getX() + mBodyTextView.getScrollX();
+                            float y = event.getY() + mBodyTextView.getScrollY();
+                            long offset = layout.getOffsetForPosition(x,y);
+
+                            callEditFragment(false, offset);
+                            break;
+                    }
+                }
+                return false;
+            }
+        });
 
         mDateTextView = (TextView) v.findViewById(R.id.note_date_text_view);
         mDateTextView.setAllCaps(false);
+        mDateTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mSingleTouchEdit) {
+                    callEditFragment(false,0);
+                }
+            }
+        });
 
         updateDate(mNote.getDate());
         return v;
@@ -147,7 +194,7 @@ public class NoteViewFragment extends Fragment {
         // back button, the views are already setup and inflated.
         // Allowing for easy binding new data changes
         if (mNewNote) {
-            callEditFragment(true);
+            callEditFragment(true, 0);
             mNewNote = false;
         }
     }
@@ -254,7 +301,7 @@ public class NoteViewFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.menu_item_edit_note:
                 // start edit fragment
-                callEditFragment(false);
+                callEditFragment(false, 0);
                 return true;
             case R.id.menu_item_delete_note :
                 showConfirmDeleteDialog();
@@ -264,8 +311,9 @@ public class NoteViewFragment extends Fragment {
         }
     }
 
-    private void callEditFragment(boolean isNewNote) {
-        Intent intent = NoteEditActivity.newIntent(getActivity(), mNote.getID(), isNewNote);
+    private void callEditFragment(boolean isNewNote, long offset) {
+        Intent intent = NoteEditActivity.newIntent(getActivity(), mNote.getID(), isNewNote,
+                offset);
         startActivityForResult(intent, REQUEST_NOTE_EDIT);
     }
 

@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.daytron.plain_memo.R;
@@ -38,18 +37,22 @@ public class NoteEditFragment extends Fragment {
             "com.github.daytron.plain_memo.note_values";
     private static final String ARG_NOTE_EDIT_ID = "note_edit_id";
     private static final String ARG_NOTE_IS_NEW = "note_edit_is_new";
+    private static final String ARG_NOTE_OFFSET = "note_edit_offset";
 
     private Note mNote;
-    private TextView mTitleField;
-    private TextView mBodyField;
+    private EditText mTitleField;
+    private EditText mBodyField;
 
     private boolean mNewNote;
     private boolean mUpdated;
+    private long mCursorBodyOffset;
 
-    public static NoteEditFragment newInstance(UUID noteId, boolean isNewNote) {
+    public static NoteEditFragment newInstance(UUID noteId, boolean isNewNote,
+                                               long offset) {
         Bundle args = new Bundle();
         args.putSerializable(ARG_NOTE_EDIT_ID, noteId);
         args.putBoolean(ARG_NOTE_IS_NEW, isNewNote);
+        args.putLong(ARG_NOTE_OFFSET, offset);
 
         NoteEditFragment fragment = new NoteEditFragment();
         fragment.setArguments(args);
@@ -78,6 +81,9 @@ public class NoteEditFragment extends Fragment {
         mNewNote = getArguments().getBoolean(ARG_NOTE_IS_NEW);
         mNote = NoteBook.get(getActivity()).getNote(noteId);
 
+        mCursorBodyOffset = getArguments().getLong(ARG_NOTE_OFFSET);
+        String val = "offset value: " + mCursorBodyOffset;
+
         setHasOptionsMenu(true);
     }
 
@@ -103,14 +109,24 @@ public class NoteEditFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_note_edit,container,false);
+        View v = inflater.inflate(R.layout.fragment_note_edit, container, false);
 
         mTitleField = (EditText) v.findViewById(R.id.note_title_edit_text);
         mTitleField.setText(mNote.getTitle());
 
         mBodyField = (EditText) v.findViewById(R.id.note_body_edit_text);
         mBodyField.setText(mNote.getBody());
+        mBodyField.requestFocus();
         mBodyField.setAllCaps(false);
+
+        // Apply offset cursor position from NoteViewFragment
+        if (mCursorBodyOffset > 0) {
+            mBodyField.setSelection((int) mCursorBodyOffset);
+        } else {
+            // move cursor in the last position
+            // Default behaviour
+            mBodyField.setSelection(mBodyField.length());
+        }
 
         mTitleField.addTextChangedListener(new TextWatcher() {
             @Override
@@ -152,8 +168,8 @@ public class NoteEditFragment extends Fragment {
      * button has predefined functions based on {@link android.content.DialogInterface.OnClickListener}
      * listener object passed as argument.
      *
-     * @param listener  The DialogInterface.OnClickListener object that can be used as click
-     *                  listener for AlertDialog object.
+     * @param listener The DialogInterface.OnClickListener object that can be used as click
+     *                 listener for AlertDialog object.
      */
     private void createConfirmDialog(Context context, DialogInterface.OnClickListener listener) {
         final AlertDialog alertDialog = new AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
@@ -161,7 +177,7 @@ public class NoteEditFragment extends Fragment {
                 .setMessage(R.string.confirm_dialog_save_body)
                 .setPositiveButton(R.string.dialog_button_save, listener)
                 .setNegativeButton(R.string.dialog_button_delete, listener)
-                .setNeutralButton(android.R.string.cancel,listener)
+                .setNeutralButton(android.R.string.cancel, listener)
                 .create();
         alertDialog.show();
     }
@@ -170,12 +186,12 @@ public class NoteEditFragment extends Fragment {
      * Shows confirm save dialog on various states of this fragment. Accepts boolean flag to
      * distinguish if the call came from pressing back button or from the save menu item button.
      *
-     * @param isFromMenuItemPressed     boolean flag to differentiate if the method call was made
-     *                                  either from pressing back button or from the menu save item
+     * @param isFromMenuItemPressed boolean flag to differentiate if the method call was made
+     *                              either from pressing back button or from the menu save item
      */
     public void showConfirmSaveDialog(Context context, boolean isFromMenuItemPressed) {
         if (mNewNote) {
-            if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()){
+            if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()) {
                 if (mNote.getBody() == null || mNote.getBody().trim().isEmpty()) {
                     if (isFromMenuItemPressed) {
                         Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
@@ -343,7 +359,7 @@ public class NoteEditFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_save_note :
+            case R.id.menu_item_save_note:
                 showConfirmSaveDialog(getActivity(), true);
                 return true;
             default:

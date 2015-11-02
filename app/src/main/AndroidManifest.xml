@@ -22,10 +22,10 @@
         </activity>
         <activity
             android:name=".view.NotePagerActivity"
-            android:parentActivityName=".NoteListActivity" >
-        </activity>
-        <activity android:name=".view.NoteEditActivity">
-        </activity>
+            android:parentActivityName=".NoteListActivity" />
+        <activity android:name=".view.NoteEditActivity" />
+        <activity android:name=".settings.UserPreferenceActivity"
+            android:parentActivityName=".NoteListActivity"/>
     </application>
 
 </manifest>

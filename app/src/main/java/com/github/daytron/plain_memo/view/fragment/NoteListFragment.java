@@ -2,7 +2,9 @@ package com.github.daytron.plain_memo.view.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -30,6 +32,7 @@ import com.github.daytron.plain_memo.NoteListActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
+import com.github.daytron.plain_memo.settings.UserPreferenceActivity;
 import com.github.daytron.plain_memo.view.NotePagerActivity;
 
 import java.util.ArrayList;
@@ -40,8 +43,6 @@ import java.util.List;
  * Created by ryan on 27/10/15.
  */
 public class NoteListFragment extends Fragment implements SearchView.OnQueryTextListener {
-
-    private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
 
     private LinearLayout mContentLinearLayout;
     private TextView mEmptyTextView;
@@ -120,10 +121,6 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             }
         });
 
-        if (savedInstanceState != null) {
-            mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
-        }
-
         NoteBook noteBook = NoteBook.get(getActivity());
         mListOfNotes = noteBook.getNotes();
 
@@ -161,6 +158,11 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     @Override
     public void onResume() {
         super.onResume();
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSubtitleVisible = sharedPref
+                .getBoolean(getString(R.string.pref_appearance_show_num_notes_key),true);
+
         updateUI();
     }
 
@@ -472,13 +474,6 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         inflater.inflate(R.menu.fragment_note_list, menu);
 
-        MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_number_notes_subtitle);
-        if (mSubtitleVisible) {
-            subtitleItem.setTitle(R.string.hide_no_of_notes_subtitle);
-        } else {
-            subtitleItem.setTitle(R.string.show_no_of_notes_subtitle);
-        }
-
         // Get the SearchView and set its listener
         final MenuItem searchViewItem = menu.findItem(R.id.menu_item_search_note);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
@@ -539,30 +534,6 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Called to ask the fragment to save its current dynamic state, so it
-     * can later be reconstructed in a new instance of its process is
-     * restarted.  If a new instance of the fragment later needs to be
-     * created, the data you place in the Bundle here will be available
-     * in the Bundle given to {@link #onCreate(Bundle)},
-     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}, and
-     * {@link #onActivityCreated(Bundle)}.
-     * <p/>
-     * <p>This corresponds to {@link Activity#onSaveInstanceState(Bundle)
-     * Activity.onSaveInstanceState(Bundle)} and most of the discussion there
-     * applies here as well.  Note however: <em>this method may be called
-     * at any time before {@link #onDestroy()}</em>.  There are many situations
-     * where a fragment may be mostly torn down (such as when placed on the
-     * back stack with no UI showing), but its state will not be saved until
-     * its owning activity actually needs to save its state.
-     *
-     * @param outState Bundle in which to place your saved state.
-     */
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
-    }
-
-    /**
      * This hook is called whenever an item in your options menu is selected.
      * The default implementation simply returns false to have the normal
      * processing happen (calling the item's Runnable or sending a message to
@@ -587,12 +558,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
                 Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), true);
                 startActivity(intent);
                 return true;
-            case R.id.menu_item_show_number_notes_subtitle:
-                mSubtitleVisible = !mSubtitleVisible;
-                getActivity().supportInvalidateOptionsMenu();
-                updateSubtitle();
-                return true;
             case R.id.action_settings:
+                Intent intentPreference = new Intent(getActivity(), UserPreferenceActivity.class);
+                startActivity(intentPreference);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
