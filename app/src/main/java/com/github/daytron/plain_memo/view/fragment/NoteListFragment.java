@@ -46,7 +46,7 @@ import java.util.List;
  */
 public class NoteListFragment extends Fragment implements SearchView.OnQueryTextListener {
 
-    private final String ARG_FILTERED_NOTES_LIST = "filtered_note_list";
+    private final String ARG_QUERY_SEARCH_STRING = "query_search_string";
 
     private LinearLayout mContentLinearLayout;
     private TextView mEmptyTextView;
@@ -200,7 +200,29 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(ARG_FILTERED_NOTES_LIST, (ArrayList<Note>)mFilteredNotes);
+        outState.putString(ARG_QUERY_SEARCH_STRING, mCurrentFilterQuery);
+    }
+
+    /**
+     * Called when the fragment's activity has been created and this
+     * fragment's view hierarchy instantiated.  It can be used to do final
+     * initialization once these pieces are in place, such as retrieving
+     * views or restoring state.  It is also useful for fragments that use
+     * {@link #setRetainInstance(boolean)} to retain their instance,
+     * as this callback tells the fragment when it is fully associated with
+     * the new activity instance.  This is called after {@link #onCreateView}
+     * and before {@link #onViewStateRestored(Bundle)}.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     *                           a previous saved state, this is the state.
+     */
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            // Restore any previous active search filter
+            mCurrentFilterQuery = savedInstanceState.getString(ARG_QUERY_SEARCH_STRING);
+        }
     }
 
     /**
@@ -545,6 +567,15 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         final MenuItem searchViewItem = menu.findItem(R.id.menu_item_search_note);
         mSearchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
         mSearchView.setOnQueryTextListener(this);
+
+        // Apply search filter when configuration is changed (e.g. screen rotation)
+        // only when searchview is active from previous configuration or screen
+        if (mCurrentFilterQuery != null) {
+            mSearchView.setQuery(mCurrentFilterQuery, false);
+            mSearchView.setFocusable(true);
+            mSearchView.setIconified(false);
+            mSearchView.requestFocusFromTouch();
+        }
     }
 
     /**
