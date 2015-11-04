@@ -1,6 +1,8 @@
 package com.github.daytron.plain_memo.settings;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -13,6 +15,8 @@ import android.widget.Toast;
 
 import com.github.daytron.plain_memo.BuildConfig;
 import com.github.daytron.plain_memo.R;
+import com.github.daytron.plain_memo.data.GlobalValues;
+import com.jaredrummler.android.device.DeviceName;
 
 import java.util.Calendar;
 import java.util.List;
@@ -102,6 +106,18 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
             if (getString(R.string.pref_general).equals(settingsVal)) {
                 addPreferencesFromResource(R.xml.settings_general);
 
+                Preference sendFeedbackPreference = findPreference(
+                        getString(R.string.pref_general_send_feedback_key)
+                );
+                sendFeedbackPreference.setOnPreferenceClickListener(
+                        new Preference.OnPreferenceClickListener() {
+                            @Override
+                            public boolean onPreferenceClick(Preference preference) {
+                                sendFeedbackEmail();
+                                return true;
+                            }
+                        });
+
                 ((UserPreferenceActivity) getActivity())
                         .getSupportActionBar()
                         .setTitle(getString(R.string.pref_general));
@@ -150,34 +166,6 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
         }
 
         /**
-         * This hook is called whenever an item in your options menu is selected.
-         * The default implementation simply returns false to have the normal
-         * processing happen (calling the item's Runnable or sending a message to
-         * its Handler as appropriate).  You can use this method for any items
-         * for which you would like to do processing without those other
-         * facilities.
-         * <p/>
-         * <p>Derived classes should call through to the base class for it to
-         * perform the default menu handling.
-         *
-         * @param item The menu item that was selected.
-         * @return boolean Return false to allow normal menu processing to
-         * proceed, true to consume it here.
-         * @see #onCreateOptionsMenu
-         */
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            if (android.R.id.home == item.getItemId()) {
-                //  try one of these:
-                Toast.makeText(getActivity(), "Pumasok", Toast.LENGTH_SHORT).show();
-                getActivity().dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
-                return true;
-            }
-
-            return super.onOptionsItemSelected(item);
-        }
-
-        /**
          * Called when the fragment is visible to the user and actively running.
          * This is generally
          * tied to {@link android.app.Activity#onResume() Activity.onResume} of the containing
@@ -216,8 +204,39 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equalsIgnoreCase(getString(R.string.pref_appearance_font_size_key))) {
                 Preference preference = findPreference(key);
-                preference.setSummary(((ListPreference)preference).getEntry());
+                preference.setSummary(((ListPreference) preference).getEntry());
             }
+        }
+
+        private void sendFeedbackEmail() {
+            String deviceName = DeviceName.getDeviceName();
+            String header = getString(R.string.feedback_email_header) + " " +
+                    getString(R.string.app_name) + " " + BuildConfig.VERSION_NAME;
+
+            StringBuilder stringMsgBuilder = new StringBuilder();
+            stringMsgBuilder.append(getString(R.string.feedback_email_body_hi))
+                    .append("\n\n")
+                    .append(String.format(getString(R.string.feedback_email_body_content),
+                            deviceName, Build.VERSION.RELEASE))
+                    .append("\n\n");
+
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+            String uriString = "mailto:"
+                    + Uri.encode(getString(R.string.app_support_email))
+                    + "?subject=" + Uri.encode(header) +
+                    "&body=" + Uri.encode(stringMsgBuilder.toString());
+            Uri uri = Uri.parse(uriString);
+            emailIntent.setData(uri);
+
+            try {
+                startActivity(Intent.createChooser(emailIntent,
+                        getString(R.string.feedback_client_selection_title)));
+                getActivity().finish();
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(getActivity(),
+                        getString(R.string.feedback_email_no_client), Toast.LENGTH_SHORT).show();
+            }
+
         }
     }
 }

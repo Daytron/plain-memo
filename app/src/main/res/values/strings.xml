@@ -1,10 +1,18 @@
 <resources>
     <string name="app_name">Plain Memo</string>
     <string name="app_developer">Ryan Gilera</string>
+    <string name="app_support_email">ryangilera@gmail.com</string>
     <string name="app_release_year">2015</string>
     <string name="action_settings">Settings</string>
 
     <string name="note_list_empty_label">There are no notes</string>
+
+    <!--Feedback email-->
+    <string name="feedback_email_header">Feedback for </string>
+    <string name="feedback_email_body_hi">Hi,</string>
+    <string name="feedback_email_body_content">I am using a %1$s running Android %2$s.</string>
+    <string name="feedback_email_no_client">There is no email client installed.</string>
+    <string name="feedback_client_selection_title">Select your email client:</string>
 
     <string name="new_note">New Note</string>
     <string name="edit_note">Edit</string>
