@@ -46,11 +46,16 @@ import java.util.List;
  */
 public class NoteListFragment extends Fragment implements SearchView.OnQueryTextListener {
 
+    private final String ARG_FILTERED_NOTES_LIST = "filtered_note_list";
+
     private LinearLayout mContentLinearLayout;
     private TextView mEmptyTextView;
     private RecyclerView mNoteRecyclerView;
     private NoteListAdapter mAdapter;
     private List<Note> mListOfNotes;
+    private List<Note> mFilteredNotes;
+    private SearchView mSearchView;
+    private String mCurrentFilterQuery;
 
     private boolean mSubtitleVisible;
     private boolean isDBClose = false;
@@ -133,32 +138,69 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             }
         });
 
-        NoteBook noteBook = NoteBook.get(getActivity());
-        mListOfNotes = noteBook.getNotes();
-
         updateUI();
         return view;
     }
 
     private void updateUI() {
-        NoteBook noteBook = NoteBook.get(getActivity());
-        List<Note> notes = noteBook.getNotes();
+        // Update list (for new changes)
+        mListOfNotes = NoteBook.get(getActivity()).getNotes();
 
-        if (noteBook.getNotes().isEmpty()) {
+        if (mListOfNotes.isEmpty()) {
             mEmptyTextView.setVisibility(View.VISIBLE);
         } else {
             mEmptyTextView.setVisibility(View.GONE);
         }
 
         if (mAdapter == null) {
-            mAdapter = new NoteListAdapter(notes);
+            mAdapter = new NoteListAdapter(new ArrayList<>(mListOfNotes));
             mNoteRecyclerView.setAdapter(mAdapter);
         } else  {
-            mAdapter.setNotes(notes);
+            if (mFilteredNotes != null &&
+                    mSearchView != null &&
+                    !mSearchView.isIconified() &&
+                    mCurrentFilterQuery != null &&
+                    !mCurrentFilterQuery.isEmpty()) {
+                // Updates filtered notes list
+                // This is for updating the note list when the user
+                // created a note in the middle of search query event
+                // upon return to this fragment the list is updated
+                // Whether the user created a new note or not,
+                // The note list is re-filtered
+                mFilteredNotes = filter(mListOfNotes, mCurrentFilterQuery);
+                mAdapter.setNotes(mFilteredNotes);
+            } else {
+                mAdapter.setNotes(new ArrayList<>(mListOfNotes));
+            }
             mAdapter.notifyDataSetChanged();
         }
 
         updateSubtitle();
+    }
+
+    /**
+     * Called to ask the fragment to save its current dynamic state, so it
+     * can later be reconstructed in a new instance of its process is
+     * restarted.  If a new instance of the fragment later needs to be
+     * created, the data you place in the Bundle here will be available
+     * in the Bundle given to {@link #onCreate(Bundle)},
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}, and
+     * {@link #onActivityCreated(Bundle)}.
+     * <p/>
+     * <p>This corresponds to {@link Activity#onSaveInstanceState(Bundle)
+     * Activity.onSaveInstanceState(Bundle)} and most of the discussion there
+     * applies here as well.  Note however: <em>this method may be called
+     * at any time before {@link #onDestroy()}</em>.  There are many situations
+     * where a fragment may be mostly torn down (such as when placed on the
+     * back stack with no UI showing), but its state will not be saved until
+     * its owning activity actually needs to save its state.
+     *
+     * @param outState Bundle in which to place your saved state.
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(ARG_FILTERED_NOTES_LIST, (ArrayList<Note>)mFilteredNotes);
     }
 
     /**
@@ -316,7 +358,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
          * layout file.
          * <p/>
          * The new ViewHolder will be used to display items of the adapter using
-         * {@link #onBindViewHolder(ViewHolder, int, List)}. Since it will be re-used to display
+         * {@link #onBindViewHolder(RecyclerView.ViewHolder, int, List)}. Since it will be re-used to display
          * different items in the data set, it is a good idea to cache references to sub views of
          * the View to avoid unnecessary {@link View#findViewById(int)} calls.
          *
@@ -325,7 +367,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
          * @param viewType The view type of the new View.
          * @return A new ViewHolder that holds a View of the given view type.
          * @see #getItemViewType(int)
-         * @see #onBindViewHolder(ViewHolder, int)
+         * @see #onBindViewHolder(NoteHolder, int)
          */
         @Override
         public NoteHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -337,18 +379,19 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         /**
          * Called by RecyclerView to display the data at the specified position. This method should
-         * update the contents of the {@link ViewHolder#itemView} to reflect the item at the given
-         * position.
+         * update the contents of the {@link android.support.v7.widget.RecyclerView.ViewHolder#itemView}
+         * to reflect the item at the given position.
          * <p/>
          * Note that unlike {@link ListView}, RecyclerView will not call this method
          * again if the position of the item changes in the data set unless the item itself is
          * invalidated or the new position cannot be determined. For this reason, you should only
          * use the <code>position</code> parameter while acquiring the related data item inside
          * this method and should not keep a copy of it. If you need the position of an item later
-         * on (e.g. in a click listener), use {@link ViewHolder#getAdapterPosition()} which will
+         * on (e.g. in a click listener), use
+         * {@link android.support.v7.widget.RecyclerView.ViewHolder#getAdapterPosition()} which will
          * have the updated adapter position.
          * <p/>
-         * Override {@link #onBindViewHolder(ViewHolder, int, List)} instead if Adapter can
+         * Override {@link #onBindViewHolder(RecyclerView.ViewHolder, int, List)} instead if Adapter can
          * handle effcient partial bind.
          *
          * @param holder   The ViewHolder which should be updated to represent the contents of the
@@ -500,8 +543,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         // Get the SearchView and set its listener
         final MenuItem searchViewItem = menu.findItem(R.id.menu_item_search_note);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
-        searchView.setOnQueryTextListener(this);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
+        mSearchView.setOnQueryTextListener(this);
     }
 
     /**
@@ -529,8 +572,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
      */
     @Override
     public boolean onQueryTextChange(String newText) {
-        final List<Note> filteredNotes = filter(mListOfNotes, newText);
-        mAdapter.animateTo(filteredNotes);
+        mCurrentFilterQuery = newText.trim();
+        mFilteredNotes = filter(mListOfNotes, mCurrentFilterQuery);
+        mAdapter.animateTo(mFilteredNotes);
         mNoteRecyclerView.scrollToPosition(0);
         return true;
     }
