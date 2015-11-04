@@ -47,6 +47,7 @@ import java.util.List;
 public class NoteListFragment extends Fragment implements SearchView.OnQueryTextListener {
 
     private final String ARG_QUERY_SEARCH_STRING = "query_search_string";
+    private final String ARG_SEARCHVIEW_MENU_EXPANDED = "searchview_menu_expanded";
 
     private LinearLayout mContentLinearLayout;
     private TextView mEmptyTextView;
@@ -59,6 +60,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
     private boolean mSubtitleVisible;
     private boolean isDBClose = false;
+    private boolean mSearchViewMenuItemExpanded = false;
 
     /**
      * Called to do initial creation of a fragment.  This is called after
@@ -201,6 +203,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(ARG_QUERY_SEARCH_STRING, mCurrentFilterQuery);
+
+        mSearchViewMenuItemExpanded = !(mSearchView != null && mSearchView.isIconified());
+        outState.putBoolean(ARG_SEARCHVIEW_MENU_EXPANDED, mSearchViewMenuItemExpanded);
     }
 
     /**
@@ -222,6 +227,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         if (savedInstanceState != null) {
             // Restore any previous active search filter
             mCurrentFilterQuery = savedInstanceState.getString(ARG_QUERY_SEARCH_STRING);
+            mSearchViewMenuItemExpanded = savedInstanceState
+                    .getBoolean(ARG_SEARCHVIEW_MENU_EXPANDED);
         }
     }
 
@@ -570,7 +577,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         // Apply search filter when configuration is changed (e.g. screen rotation)
         // only when searchview is active from previous configuration or screen
-        if (mCurrentFilterQuery != null) {
+        if (mCurrentFilterQuery != null && mSearchViewMenuItemExpanded) {
             mSearchView.setQuery(mCurrentFilterQuery, false);
             mSearchView.setFocusable(true);
             mSearchView.setIconified(false);
