@@ -120,7 +120,7 @@ public class NoteEditFragment extends Fragment {
                         String.valueOf(GlobalValues.FONT_SIZE_DEFAULT));
 
         int valueSize = Integer.parseInt(selectedFontSize);
-        float fontSize = (float)valueSize;
+        float fontSize = (float) valueSize;
 
         mTitleField = (EditText) v.findViewById(R.id.note_title_edit_text);
         mTitleField.setText(mNote.getTitle());
@@ -144,7 +144,6 @@ public class NoteEditFragment extends Fragment {
                 mBodyField.setSelection(mBodyField.length());
             }
         }
-
 
 
         mTitleField.addTextChangedListener(new TextWatcher() {
@@ -213,6 +212,44 @@ public class NoteEditFragment extends Fragment {
         }
     }
 
+    private void cancelNoteFromMenuItem() {
+        if (mNewNote) {
+            sendResult(Activity.RESULT_CANCELED, true);
+            getActivity().finish();
+        } else {
+            if (mUpdated) {
+                DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                sendResult(Activity.RESULT_CANCELED, false);
+                                getActivity().finish();
+                                break;
+                            default:
+                                dialog.cancel();
+                                break;
+                        }
+                    }
+                };
+
+                final AlertDialog alertDialog = new AlertDialog.Builder(
+                        getActivity(), R.style.MyAlertDialogStyle)
+                        .setTitle(R.string.confirm_dialog_cancel_title)
+                        .setMessage(R.string.confirm_dialog_cancel_body)
+                        .setPositiveButton(R.string.dialog_button_yes, listener)
+                        .setNegativeButton(R.string.dialog_button_no, listener)
+                        .create();
+                alertDialog.show();
+            } else {
+                // If the old note is not updated via field widgets,
+                // exit this fragment and do not save in database
+                sendResult(Activity.RESULT_CANCELED, false);
+                getActivity().finish();
+            }
+        }
+    }
+
     /**
      * Shows confirm save dialog on various states of this fragment. Accepts boolean flag to
      * distinguish if the call came from pressing back button or from the save menu item button.
@@ -220,19 +257,12 @@ public class NoteEditFragment extends Fragment {
      * @param isFromMenuItemPressed boolean flag to differentiate if the method call was made
      *                              either from pressing back button or from the menu save item
      */
-    public void showConfirmSaveDialog(Context context, boolean isFromMenuItemPressed) {
+    public void showConfirmSaveDialog(Context context) {
         if (mNewNote) {
             if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()) {
                 if (mNote.getBody() == null || mNote.getBody().trim().isEmpty()) {
-                    if (isFromMenuItemPressed) {
-                        Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
-                                Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, -50);
-                        toast.show();
-                    } else {
-                        sendResult(Activity.RESULT_CANCELED, true);
-                        getActivity().finish();
-                    }
+                    sendResult(Activity.RESULT_CANCELED, true);
+                    getActivity().finish();
                 } else {
                     DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
                         @Override
@@ -390,6 +420,9 @@ public class NoteEditFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_item_cancel_note:
+                cancelNoteFromMenuItem();
+                return true;
             case R.id.menu_item_save_note:
                 saveNoteFromMenuItem();
                 return true;

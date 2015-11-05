@@ -19,6 +19,7 @@
     <string name="save_note">Save</string>
     <string name="delete_note">Delete</string>
     <string name="search_note">Search</string>
+    <string name="cancel_note">Cancel</string>
 
     <plurals name="subtitle_plural">
         <item quantity="one">%1$s note</item>
@@ -36,12 +37,17 @@
     <string name="confirm_dialog_delete_title">Confirm Deletion</string>
     <string name="confirm_dialog_save_body">Save the note?</string>
     <string name="confirm_dialog_delete_body">Delete the note </string>
+    <string name="confirm_dialog_cancel_title">Confirm Cancellation</string>
+    <string name="confirm_dialog_cancel_body">Cancel operation?</string>
     <string name="dialog_button_save">Save</string>
     <string name="dialog_button_delete">Delete</string>
+    <string name="dialog_button_yes">Yes</string>
+    <string name="dialog_button_no">No</string>
     
     <!-- Toast -->
     <string name="toast_note_save">The note has been saved</string>
     <string name="toast_note_deletion">The note has been deleted</string>
+    <string name="toast_note_cancel_save_operation">The operation has been cancelled</string>
     <string name="toast_title_empty">Please enter a title</string>
 
     <!-- Settings Preferences -->

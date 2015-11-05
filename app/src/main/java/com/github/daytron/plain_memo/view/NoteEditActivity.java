@@ -50,7 +50,7 @@ public class NoteEditActivity extends SingleFragmentActivity {
 
         if (fragment instanceof NoteEditFragment) {
             ((NoteEditFragment) fragment).showConfirmSaveDialog(
-                    getSupportActionBar().getThemedContext(), false);
+                    getSupportActionBar().getThemedContext());
         } else {
             super.onBackPressed();
         }

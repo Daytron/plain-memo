@@ -241,9 +241,10 @@ public class NoteViewFragment extends Fragment {
                 if (isForDeletion) {
                     NoteBook.get(getActivity()).deleteNote(mNote);
                     getActivity().finish();
-                    Toast.makeText(getActivity(), R.string.toast_note_deletion,
-                            Toast.LENGTH_SHORT).show();
                 }
+
+                Toast.makeText(getActivity(), R.string.toast_note_cancel_save_operation,
+                        Toast.LENGTH_SHORT).show();
             }
         } else if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_NOTE_EDIT) {
