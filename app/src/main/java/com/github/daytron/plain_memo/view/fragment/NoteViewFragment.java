@@ -383,6 +383,9 @@ public class NoteViewFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_item_share_note:
+                shareNote();
+                return true;
             case R.id.menu_item_edit_note:
                 // start edit fragment
                 callEditFragment(false, 0);
@@ -393,6 +396,19 @@ public class NoteViewFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void shareNote() {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+
+        StringBuilder textData = new StringBuilder();
+        textData.append(mNote.getTitle())
+                .append(". ")
+                .append(mNote.getBody());
+        intent.putExtra(Intent.EXTRA_TEXT, textData.toString());
+        intent.setType("text/plain");
+        startActivity(Intent.createChooser(intent, getResources().getText(R.string.share_to)));
     }
 
     private void callEditFragment(boolean isNewNote, long offset) {

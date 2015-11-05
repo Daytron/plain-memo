@@ -20,6 +20,7 @@
     <string name="delete_note">Delete</string>
     <string name="search_note">Search</string>
     <string name="cancel_note">Cancel</string>
+    <string name="share_note">Share</string>
 
     <plurals name="subtitle_plural">
         <item quantity="one">%1$s note</item>
@@ -34,6 +35,9 @@
 
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
+
+    <!--Share Intent chooser -->
+    <string name="share_to">Share to:</string>
 
     <!-- Confirmation dialog -->
     <string name="confirm_dialog_save_title">Confirm Save</string>
