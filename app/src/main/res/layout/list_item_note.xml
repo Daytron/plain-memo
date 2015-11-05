@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="3.5"
             android:paddingTop="5dp"
-            android:drawableStart="@drawable/ic_file_document"
+            android:drawableStart="@drawable/ic_note_icon"
             android:drawablePadding="5dp"
             android:gravity="center_vertical"
             tools:ignore="MissingPrefix"
