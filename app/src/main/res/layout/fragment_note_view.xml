@@ -1,58 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorBackgroundNoteBody"
-    android:orientation="vertical">
+<ScrollView android:id="@+id/scrollView1"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/colorBackgroundNoteTitle"
-        android:paddingTop="20dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingBottom="10dp">
+        android:background="@color/colorBackgroundNoteBody"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/note_title_text_view"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            tools:ignore="MissingPrefix"
-            fontPath="fonts/OpenSans-Semibold.ttf"
+            android:background="@color/colorBackgroundNoteTitle"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="20dp">
+
+            <TextView
+                android:id="@+id/note_title_text_view"
+                fontPath="fonts/OpenSans-Semibold.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:textColor="@color/colorFontNormal"
+                tools:ignore="MissingPrefix"
+                tools:text="My note"/>
+
+            <TextView
+                android:id="@+id/note_date_text_view"
+                fontPath="fonts/OpenSans-Light.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                tools:ignore="MissingPrefix"
+                tools:text="3 January 2015 09:15 am"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorNoteItemSeparator"/>
+
+        <TextView
+            android:id="@+id/note_body_text_view"
+            fontPath="fonts/OpenSans-Regular.ttf"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
             android:textColor="@color/colorFontNormal"
-            tools:text="My note"/>
-
-        <TextView
-            android:id="@+id/note_date_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="5dp"
             tools:ignore="MissingPrefix"
-            fontPath="fonts/OpenSans-Light.ttf"
-            tools:text="3 January 2015 09:15 am"/>
+            tools:text="This is a note"/>
 
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/colorNoteItemSeparator"/>
-
-    <TextView
-        android:id="@+id/note_body_text_view"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="20dp"
-        tools:ignore="MissingPrefix"
-        fontPath="fonts/OpenSans-Regular.ttf"
-        android:textColor="@color/colorFontNormal"
-        tools:text="This is a note" />
-
-</LinearLayout>
+</ScrollView>
