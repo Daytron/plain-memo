@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,10 +26,10 @@ import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
+import com.github.daytron.plain_memo.util.DateUtil;
 import com.github.daytron.plain_memo.view.NoteEditActivity;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -120,17 +121,17 @@ public class NoteViewFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_note_view,container,false);
+        View v = inflater.inflate(R.layout.fragment_note_view, container, false);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mSingleTouchEdit = sharedPref
-                .getBoolean(getString(R.string.pref_appearance_single_tap_edit_key),true);
+                .getBoolean(getString(R.string.pref_appearance_single_tap_edit_key), true);
         String selectedFontSize = sharedPref
                 .getString(getString(R.string.pref_appearance_font_size_key),
                         String.valueOf(GlobalValues.FONT_SIZE_DEFAULT));
 
         int valueSize = Integer.parseInt(selectedFontSize);
-        float fontSize = (float)valueSize;
+        float fontSize = (float) valueSize;
 
         mTitleTextView = (TextView) v.findViewById(R.id.note_title_text_view);
         mTitleTextView.setAllCaps(false);
@@ -171,18 +172,18 @@ public class NoteViewFragment extends Fragment {
 
         mDateTextView = (TextView) v.findViewById(R.id.note_date_text_view);
         mDateTextView.setAllCaps(false);
-        mDateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,fontSize -
+        mDateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize -
                 GlobalValues.FONT_SIZE_DIFFERENCE);
         mDateTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mSingleTouchEdit) {
-                    callEditFragment(false,0);
+                    callEditFragment(false, 0);
                 }
             }
         });
 
-        updateDate(mNote.getDate());
+        updateDate();
         return v;
     }
 
@@ -207,9 +208,83 @@ public class NoteViewFragment extends Fragment {
         }
     }
 
-    private void updateDate(Date date) {
-        CharSequence dateText = DateFormat.format("cccc, MMMM d, yyyy   h:mm aa", date);
-        mDateTextView.setText(dateText);
+    private void updateDate() {
+        Calendar created = Calendar.getInstance();
+        created.setTime(mNote.getDateCreated());
+        Calendar edited = Calendar.getInstance();
+        edited.setTime(mNote.getDateEdited());
+
+        StringBuilder dateTimeFormatted = new StringBuilder();
+
+        final String SPACE = " ";
+        String timeLocaleFormatted;
+        if (mNote.isEdited()) {
+            timeLocaleFormatted = DateUtil
+                    .getTimeStringLocale(getActivity(), mNote.getDateEdited());
+            timeLocaleFormatted += SPACE + getString(R.string.note_date_edited);
+        } else {
+            timeLocaleFormatted = DateUtil
+                    .getTimeStringLocale(getActivity(), mNote.getDateCreated());
+            timeLocaleFormatted += SPACE + getString(R.string.note_date_created);
+        }
+
+        String weekday = DateUtils.formatDateTime(getActivity(),
+                mNote.getDateEdited().getTime(),
+                DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY);
+        int valueCompareTo = DateUtil.compareToToday(mNote.getDateEdited());
+        switch (valueCompareTo) {
+            case 0:
+                // Today
+                dateTimeFormatted.append(weekday)
+                        .append(SPACE)
+                        .append(getString(R.string.today))
+                        .append(SPACE)
+                        .append(timeLocaleFormatted);
+                break;
+            case 1:
+                // Yesterday
+                dateTimeFormatted.append(weekday)
+                        .append(SPACE)
+                        .append(getString(R.string.yesterday))
+                        .append(SPACE)
+                        .append(timeLocaleFormatted);
+                break;
+            case 2:
+                // Last seven days excluding today and yesterday
+                // For now case 2 and 3 have the same result format
+                String dayAndMonth1 = DateUtils.formatDateTime(getActivity(),
+                        mNote.getDateEdited().getTime(),
+                        DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_NO_YEAR);
+                dateTimeFormatted.append(weekday)
+                        .append(SPACE)
+                        .append(dayAndMonth1)
+                        .append(SPACE)
+                        .append(timeLocaleFormatted);
+                break;
+            case 3:
+                // Within the same year excluding last seven days
+                String dayAndMonth2 = DateUtils.formatDateTime(getActivity(),
+                        mNote.getDateEdited().getTime(),
+                        DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_NO_YEAR);
+                dateTimeFormatted.append(weekday)
+                        .append(SPACE)
+                        .append(dayAndMonth2)
+                        .append(SPACE)
+                        .append(timeLocaleFormatted);
+                break;
+            default:
+                // Last year
+                String dayMonthYear = DateUtils.formatDateTime(getActivity(),
+                        mNote.getDateEdited().getTime(),
+                        DateUtils.FORMAT_ABBREV_MONTH);
+                dateTimeFormatted.append(weekday)
+                        .append(SPACE)
+                        .append(dayMonthYear)
+                        .append(SPACE)
+                        .append(timeLocaleFormatted);
+        }
+
+        mDateTextView.setText(dateTimeFormatted.toString());
     }
 
     @Override
@@ -233,10 +308,10 @@ public class NoteViewFragment extends Fragment {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_CANCELED ) {
+        if (resultCode == Activity.RESULT_CANCELED) {
             if (requestCode == REQUEST_NOTE_EDIT) {
                 boolean isForDeletion = data.getBooleanExtra(
-                        NoteEditFragment.EXTRA_NOTE_FOR_DELETION,false);
+                        NoteEditFragment.EXTRA_NOTE_FOR_DELETION, false);
 
                 if (isForDeletion) {
                     NoteBook.get(getActivity()).deleteNote(mNote);
@@ -254,12 +329,12 @@ public class NoteViewFragment extends Fragment {
                         NoteEditFragment.EXTRA_NOTE_STRING_VALUES);
                 mNote.setTitle(stringUpdatedData[0]);
                 mNote.setBody(stringUpdatedData[1]);
-                mNote.setDate(Calendar.getInstance().getTime());
+                mNote.setDateEdited(Calendar.getInstance().getTime());
 
                 // Apply new changes to views
                 mTitleTextView.setText(mNote.getTitle());
                 mBodyTextView.setText(mNote.getBody());
-                updateDate(mNote.getDate());
+                updateDate();
 
                 // Update database
                 NoteBook.get(getActivity()).updateNote(mNote);
@@ -312,7 +387,7 @@ public class NoteViewFragment extends Fragment {
                 // start edit fragment
                 callEditFragment(false, 0);
                 return true;
-            case R.id.menu_item_delete_note :
+            case R.id.menu_item_delete_note:
                 showConfirmDeleteDialog();
                 return true;
             default:
@@ -330,7 +405,7 @@ public class NoteViewFragment extends Fragment {
         String msgBody = getString(R.string.confirm_dialog_delete_body)
                 + " \"" + mNote.getTitle() + "\"?";
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity(),R.style.MyAlertDialogStyle)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.MyAlertDialogStyle)
                 .setTitle(R.string.confirm_dialog_delete_title)
                 .setMessage(msgBody)
                 .setPositiveButton(R.string.dialog_button_delete, new DialogInterface.OnClickListener() {
@@ -339,7 +414,7 @@ public class NoteViewFragment extends Fragment {
                         NoteBook noteBook = NoteBook.get(getActivity());
                         noteBook.deleteNote(mNote);
                         getActivity().finish();
-                        Toast.makeText(getActivity(),R.string.toast_note_deletion,
+                        Toast.makeText(getActivity(), R.string.toast_note_deletion,
                                 Toast.LENGTH_SHORT).show();
                     }
                 })

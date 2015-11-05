@@ -91,7 +91,8 @@ public class NoteBook {
         values.put(NoteTable.Cols.UUID, note.getID().toString());
         values.put(NoteTable.Cols.TITLE, note.getTitle());
         values.put(NoteTable.Cols.BODY, note.getBody());
-        values.put(NoteTable.Cols.DATE, note.getDate().getTime());
+        values.put(NoteTable.Cols.DATE_CREATED, note.getDateCreated().getTime());
+        values.put(NoteTable.Cols.DATE_EDITED, note.getDateEdited().getTime());
 
         return values;
     }

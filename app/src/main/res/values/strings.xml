@@ -29,7 +29,10 @@
     <string name="note_title_label">Title</string>
     <string name="note_title_hint">Enter a title for the note</string>
     <string name="note_body_hint">Enter message</string>
+    <string name="note_date_created">(created)</string>
+    <string name="note_date_edited">(last edited)</string>
 
+    <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
 
     <!-- Confirmation dialog -->

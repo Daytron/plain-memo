@@ -22,12 +22,14 @@ class NoteCursorWrapper extends CursorWrapper {
         String uuidString = getString(getColumnIndex(NoteTable.Cols.UUID));
         String title = getString(getColumnIndex(NoteTable.Cols.TITLE));
         String body = getString(getColumnIndex(NoteTable.Cols.BODY));
-        long date = getLong(getColumnIndex(NoteTable.Cols.DATE));
+        long dateCreated = getLong(getColumnIndex(NoteTable.Cols.DATE_CREATED));
+        long dateEdited = getLong(getColumnIndex(NoteTable.Cols.DATE_EDITED));
 
         Note note = new Note(UUID.fromString(uuidString));
         note.setTitle(title);
         note.setBody(body);
-        note.setDate(new Date(date));
+        note.setDateCreated(new Date(dateCreated));
+        note.setDateEdited(new Date(dateEdited));
 
         return note;
     }

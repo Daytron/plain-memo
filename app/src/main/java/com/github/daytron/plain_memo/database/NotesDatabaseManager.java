@@ -24,7 +24,8 @@ public class NotesDatabaseManager extends DatabaseManager {
                 NoteTable.Cols.UUID + ", " +
                 NoteTable.Cols.TITLE + ", " +
                 NoteTable.Cols.BODY + ", " +
-                NoteTable.Cols.DATE + ")");
+                NoteTable.Cols.DATE_CREATED + ", " +
+                NoteTable.Cols.DATE_EDITED + ")");
     }
 
     @Override

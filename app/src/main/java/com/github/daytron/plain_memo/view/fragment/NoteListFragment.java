@@ -35,10 +35,10 @@ import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.github.daytron.plain_memo.model.Note;
 import com.github.daytron.plain_memo.settings.UserPreferenceActivity;
+import com.github.daytron.plain_memo.util.DateUtil;
 import com.github.daytron.plain_memo.view.NotePagerActivity;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -106,7 +106,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         View view = inflater.inflate(R.layout.fragment_note_list, container, false);
 
         // ContextCompat allows app to choose between pre SDK 23 and above for getColor method
-        int bgColor = ContextCompat.getColor(getActivity(),R.color.colorBackgroundNoteBody);
+        int bgColor = ContextCompat.getColor(getActivity(), R.color.colorBackgroundNoteBody);
 
         mContentLinearLayout = (LinearLayout) view.findViewById(R.id.note_linear_layout_bg);
         mContentLinearLayout.setBackgroundColor(bgColor);
@@ -117,13 +117,13 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
                         String.valueOf(GlobalValues.FONT_SIZE_DEFAULT));
 
         int valueSize = Integer.parseInt(selectedFontSize);
-        float fontSize = (float)valueSize;
+        float fontSize = (float) valueSize;
 
         mEmptyTextView = (TextView) view.findViewById(R.id.note_empty_text_view);
         mEmptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        ((NoteListActivity)getActivity()).setSupportActionBar(toolbar);
+        ((NoteListActivity) getActivity()).setSupportActionBar(toolbar);
 
         mNoteRecyclerView = (RecyclerView) view.findViewById(R.id.note_recycler_view);
         mNoteRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -157,7 +157,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         if (mAdapter == null) {
             mAdapter = new NoteListAdapter(new ArrayList<>(mListOfNotes));
             mNoteRecyclerView.setAdapter(mAdapter);
-        } else  {
+        } else {
             if (mFilteredNotes != null &&
                     mSearchView != null &&
                     !mSearchView.isIconified() &&
@@ -244,7 +244,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mSubtitleVisible = sharedPref
-                .getBoolean(getString(R.string.pref_appearance_show_num_notes_key),true);
+                .getBoolean(getString(R.string.pref_appearance_show_num_notes_key), true);
 
         updateUI();
     }
@@ -275,17 +275,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     private class NoteHolder extends RecyclerView.ViewHolder
-        implements View.OnClickListener {
+            implements View.OnClickListener {
 
         private Note mNote;
 
         private final TextView mTitleTextView;
         private final TextView mDateTextView;
-
-        private Calendar mNoteCalendar;
-        private final Calendar mYesterday;
-        private final Calendar mDayMinus2;
-        private final Calendar mDayMinus8;
 
         public NoteHolder(View itemView) {
             super(itemView);
@@ -293,68 +288,59 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
             mTitleTextView = (TextView) itemView.findViewById(R.id.list_item_note_title_text_view);
             mDateTextView = (TextView) itemView.findViewById(R.id.list_item_note_date_text_view);
-
-            mYesterday = Calendar.getInstance();
-            mYesterday.add(Calendar.DAY_OF_YEAR, -1);
-
-            mDayMinus2 = Calendar.getInstance();
-            mDayMinus2.add(Calendar.DAY_OF_YEAR, -1);
-            mDayMinus2.set(Calendar.HOUR_OF_DAY, 0);
-            mDayMinus2.set(Calendar.MINUTE, 0);
-            mDayMinus2.set(Calendar.SECOND, 0);
-            mDayMinus2.set(Calendar.MILLISECOND, 0);
-
-            mDayMinus8 = Calendar.getInstance();
-            mDayMinus8.add(Calendar.DAY_OF_MONTH, -8);
-            mDayMinus8.set(Calendar.HOUR_OF_DAY, 0);
-            mDayMinus8.set(Calendar.MINUTE, 0);
-            mDayMinus8.set(Calendar.SECOND, 0);
-            mDayMinus8.set(Calendar.MILLISECOND, 0);
         }
 
         public void bindCrime(Note note) {
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            SharedPreferences sharedPref = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
             String selectedFontSize = sharedPref
                     .getString(getString(R.string.pref_appearance_font_size_key),
                             String.valueOf(GlobalValues.FONT_SIZE_DEFAULT));
 
             int valueSize = Integer.parseInt(selectedFontSize);
-            float fontSize = (float)valueSize;
+            float fontSize = (float) valueSize;
 
-            mTitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,fontSize);
+            mTitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
             mDateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP,
                     fontSize - GlobalValues.FONT_SIZE_DIFFERENCE);
 
             mNote = note;
             mTitleTextView.setText(mNote.getTitle());
 
-            mNoteCalendar = Calendar.getInstance();
-            mNoteCalendar.setTime(mNote.getDate());
+            int comparedValue = DateUtil.compareToToday(mNote.getDateEdited());
 
-            if (DateUtils.isToday(mNote.getDate().getTime())){
-                mDateTextView.setText(
-                        DateUtils.formatDateTime(getActivity(),mNote.getDate().getTime(),
-                                DateUtils.FORMAT_SHOW_TIME)
-                );
-            } else if (mNoteCalendar.get(Calendar.YEAR) == mYesterday.get(Calendar.YEAR)
-                && mNoteCalendar.get(Calendar.DAY_OF_YEAR) == mYesterday.get(Calendar.DAY_OF_YEAR)) {
-                mDateTextView.setText(R.string.yesterday);
-            } else if (mNoteCalendar.before(mDayMinus2) && mNoteCalendar.after(mDayMinus8)) {
-                mDateTextView.setText(
-                        DateUtils.formatDateTime(getActivity(),mNote.getDate().getTime(),
-                                DateUtils.FORMAT_SHOW_WEEKDAY |
-                                DateUtils.FORMAT_ABBREV_WEEKDAY)
-                );
-            } else if (mNoteCalendar.get(Calendar.YEAR) == Calendar.getInstance()
-                    .get(Calendar.YEAR)) {
-                mDateTextView.setText(
-                        DateUtils.formatDateTime(getActivity(),mNote.getDate().getTime(),
-                                DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_NO_YEAR)
-                );
-            } else {
-                mDateTextView.setText(
-                        DateFormat.getDateFormat(getActivity()).format(mNote.getDate())
-                );
+            switch (comparedValue) {
+                case 0:
+                    // Today
+                    mDateTextView.setText(
+                            DateUtils.formatDateTime(getActivity(), mNote.getDateCreated().getTime(),
+                                    DateUtils.FORMAT_SHOW_TIME)
+                    );
+                    break;
+                case 1:
+                    // Yesterday
+                    mDateTextView.setText(R.string.yesterday);
+                    break;
+                case 2:
+                    // Last seven days excluding today and yesterday
+                    mDateTextView.setText(
+                            DateUtils.formatDateTime(getActivity(), mNote.getDateCreated().getTime(),
+                                    DateUtils.FORMAT_SHOW_WEEKDAY |
+                                            DateUtils.FORMAT_ABBREV_WEEKDAY)
+                    );
+                    break;
+                case 3:
+                    // Within the same year excluding last seven days
+                    mDateTextView.setText(
+                            DateUtils.formatDateTime(getActivity(), mNote.getDateCreated().getTime(),
+                                    DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_NO_YEAR)
+                    );
+                    break;
+                default:
+                    // Last year
+                    mDateTextView.setText(
+                            DateFormat.getDateFormat(getActivity()).format(mNote.getDateCreated())
+                    );
             }
         }
 
@@ -365,7 +351,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
          */
         @Override
         public void onClick(View v) {
-            Intent intent = NotePagerActivity.newIntent(getActivity(), mNote.getID(),false);
+            Intent intent = NotePagerActivity.newIntent(getActivity(), mNote.getID(), false);
             startActivity(intent);
         }
     }
@@ -463,7 +449,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
          * Add a note to the list of notes with the given position.
          *
          * @param position The position in the list to add the note.
-         * @param note The note to be added.
+         * @param note     The note to be added.
          */
         public void addItem(int position, Note note) {
             mNotes.add(position, note);
@@ -474,7 +460,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
          * Move note from the given fromPosition to toPosition in the notes container, mNotes.
          *
          * @param fromPosition The position to move from.
-         * @param toPosition The position to move to.
+         * @param toPosition   The position to move to.
          */
         public void moveItem(int fromPosition, int toPosition) {
             final Note note = mNotes.remove(fromPosition);
@@ -532,7 +518,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
          * Detects the difference between filtered notes and original notes in the position of
          * the notes and move the note items from their original positions to their respective
          * filtered positions.
-         *
+         * <p/>
          * It is imperative to call this method after which {@link #applyAndAnimateRemovals(List)}
          * and {@link #applyAndAnimateAdditions(List)} methods are called first. Moving notes
          * without calling these methods first can be fatal to the whole operation of filtering.
@@ -622,7 +608,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
      * in the toolbar. Filter only by letter and note case sensitive. Any letter match in the
      * note's title is displayed in the filtered view.
      *
-     * @param notes The list of notes to be filtered as {@link List} object.
+     * @param notes       The list of notes to be filtered as {@link List} object.
      * @param queryString The query search text as {@link String}.
      * @return The filtered list as {@link List} object.
      */
