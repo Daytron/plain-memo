@@ -141,6 +141,26 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         });
 
         updateUI();
+
+        // Detecting intent data from other apps
+        Intent intentReceived = getActivity().getIntent();
+        String action = intentReceived.getAction();
+        String type = intentReceived.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null &&
+                "text/plain".equals(type)) {
+            String sharedText = intentReceived.getStringExtra(Intent.EXTRA_TEXT);
+            if (sharedText != null) {
+                Note newNote = new Note();
+                newNote.setBody(sharedText);
+                NoteBook.get(getActivity()).addNote(newNote);
+
+                Intent intent = NotePagerActivity.newIntent(getActivity(),
+                        newNote.getID(), true);
+                startActivity(intent);
+            }
+        }
+
         return view;
     }
 
