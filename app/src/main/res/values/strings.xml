@@ -36,6 +36,10 @@
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
 
+    <!--Title in the toolbar-->
+    <string name="toolbar_title_new_note">New Note</string>
+    <string name="toolbar_title_edit_note">Edit Note</string>
+
     <!--Share Intent chooser -->
     <string name="share_to">Share to:</string>
     <string name="share_no_app_found">No app available</string>
