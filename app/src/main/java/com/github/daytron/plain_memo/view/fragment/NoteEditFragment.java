@@ -135,7 +135,8 @@ public class NoteEditFragment extends Fragment {
 
         mTitleField = (EditText) v.findViewById(R.id.note_title_edit_text);
         mTitleField.setText(mNote.getTitle());
-        mTitleField.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+        mTitleField.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize
+                + GlobalValues.FONT_SIZE_DIFFERENCE);
 
         mBodyField = (EditText) v.findViewById(R.id.note_body_edit_text);
         mBodyField.setText(mNote.getBody());

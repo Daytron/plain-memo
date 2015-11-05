@@ -16,7 +16,7 @@
         android:paddingBottom="5dp"
         android:singleLine="true"
         tools:ignore="MissingPrefix"
-        fontPath="fonts/OpenSans-Regular.ttf"
+        fontPath="fonts/OpenSans-Semibold.ttf"
         android:background="@android:color/transparent"
         android:inputType="textShortMessage|textCapSentences"
         android:ellipsize="end"
