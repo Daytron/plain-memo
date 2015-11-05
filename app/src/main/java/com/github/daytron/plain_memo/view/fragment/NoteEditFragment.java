@@ -201,6 +201,18 @@ public class NoteEditFragment extends Fragment {
         alertDialog.show();
     }
 
+    private void saveNoteFromMenuItem() {
+        if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()) {
+            Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
+                    Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER_VERTICAL, 0, -50);
+            toast.show();
+        } else {
+            sendResult(Activity.RESULT_OK, false);
+            getActivity().finish();
+        }
+    }
+
     /**
      * Shows confirm save dialog on various states of this fragment. Accepts boolean flag to
      * distinguish if the call came from pressing back button or from the save menu item button.
@@ -379,7 +391,7 @@ public class NoteEditFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_save_note:
-                showConfirmSaveDialog(getActivity(), true);
+                saveNoteFromMenuItem();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
