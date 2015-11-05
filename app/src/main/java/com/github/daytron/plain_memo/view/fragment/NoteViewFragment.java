@@ -30,6 +30,7 @@ import com.github.daytron.plain_memo.util.DateUtil;
 import com.github.daytron.plain_memo.view.NoteEditActivity;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -323,13 +324,20 @@ public class NoteViewFragment extends Fragment {
             }
         } else if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_NOTE_EDIT) {
+                boolean isNewNote = data.getBooleanExtra(
+                        NoteEditFragment.EXTRA_NOTE_IS_NEW, false);
+
                 // Retrieve new changes
                 mNote = NoteBook.get(getActivity()).getNote(mNote.getID());
                 String[] stringUpdatedData = data.getStringArrayExtra(
                         NoteEditFragment.EXTRA_NOTE_STRING_VALUES);
                 mNote.setTitle(stringUpdatedData[0]);
                 mNote.setBody(stringUpdatedData[1]);
-                mNote.setDateEdited(Calendar.getInstance().getTime());
+
+                if (!isNewNote) {
+                    // Only update the edited date for old notes
+                    mNote.setDateEdited(Calendar.getInstance().getTime());
+                }
 
                 // Apply new changes to views
                 mTitleTextView.setText(mNote.getTitle());

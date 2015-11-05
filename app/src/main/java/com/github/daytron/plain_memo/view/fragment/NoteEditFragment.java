@@ -37,6 +37,8 @@ public class NoteEditFragment extends Fragment {
 
     public static final String EXTRA_NOTE_FOR_DELETION =
             "com.github.daytron.plain_memo.note_for_deletion";
+    public static final String EXTRA_NOTE_IS_NEW =
+            "com.github.daytron.plain_memo.note_is_new";
     public static final String EXTRA_NOTE_STRING_VALUES =
             "com.github.daytron.plain_memo.note_values";
     private static final String ARG_NOTE_EDIT_ID = "note_edit_id";
@@ -376,6 +378,7 @@ public class NoteEditFragment extends Fragment {
     private void sendResult(int resultCode, boolean forDeletion) {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_NOTE_FOR_DELETION, forDeletion);
+        intent.putExtra(EXTRA_NOTE_IS_NEW, mNewNote);
         intent.putExtra(EXTRA_NOTE_STRING_VALUES, new String[]{
                 mNote.getTitle(), mNote.getBody()
         });
