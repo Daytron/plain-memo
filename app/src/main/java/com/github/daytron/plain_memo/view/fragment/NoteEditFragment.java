@@ -200,13 +200,24 @@ public class NoteEditFragment extends Fragment {
      * @param listener The DialogInterface.OnClickListener object that can be used as click
      *                 listener for AlertDialog object.
      */
-    private void createConfirmDialog(Context context, DialogInterface.OnClickListener listener) {
+    private void createConfirmSaveDialog(Context context, DialogInterface.OnClickListener listener) {
         final AlertDialog alertDialog = new AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
                 .setTitle(R.string.confirm_dialog_save_title)
                 .setMessage(R.string.confirm_dialog_save_body)
                 .setPositiveButton(R.string.dialog_button_save, listener)
                 .setNegativeButton(R.string.dialog_button_delete, listener)
                 .setNeutralButton(android.R.string.cancel, listener)
+                .create();
+        alertDialog.show();
+    }
+
+    private void createConfirmCancelDialog(DialogInterface.OnClickListener listener) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(
+                getActivity(), R.style.MyAlertDialogStyle)
+                .setTitle(R.string.confirm_dialog_cancel_title)
+                .setMessage(R.string.confirm_dialog_cancel_body)
+                .setPositiveButton(R.string.dialog_button_yes, listener)
+                .setNegativeButton(R.string.dialog_button_no, listener)
                 .create();
         alertDialog.show();
     }
@@ -223,10 +234,29 @@ public class NoteEditFragment extends Fragment {
         }
     }
 
-    private void cancelNoteFromMenuItem() {
+    private void showConfirmCancelDialog() {
         if (mNewNote) {
-            sendResult(Activity.RESULT_CANCELED, true);
-            getActivity().finish();
+            if (mUpdated) {
+                DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                sendResult(Activity.RESULT_CANCELED, true);
+                                getActivity().finish();
+                                break;
+                            default:
+                                dialog.cancel();
+                                break;
+                        }
+                    }
+                };
+
+                createConfirmCancelDialog(listener);
+            } else {
+                sendResult(Activity.RESULT_CANCELED, true);
+                getActivity().finish();
+            }
         } else {
             if (mUpdated) {
                 DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -244,14 +274,7 @@ public class NoteEditFragment extends Fragment {
                     }
                 };
 
-                final AlertDialog alertDialog = new AlertDialog.Builder(
-                        getActivity(), R.style.MyAlertDialogStyle)
-                        .setTitle(R.string.confirm_dialog_cancel_title)
-                        .setMessage(R.string.confirm_dialog_cancel_body)
-                        .setPositiveButton(R.string.dialog_button_yes, listener)
-                        .setNegativeButton(R.string.dialog_button_no, listener)
-                        .create();
-                alertDialog.show();
+                createConfirmCancelDialog(listener);
             } else {
                 // If the old note is not updated via field widgets,
                 // exit this fragment and do not save in database
@@ -297,7 +320,7 @@ public class NoteEditFragment extends Fragment {
                         }
                     };
 
-                    createConfirmDialog(context, listener);
+                    createConfirmSaveDialog(context, listener);
                 }
             } else {
                 DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -319,7 +342,7 @@ public class NoteEditFragment extends Fragment {
                     }
                 };
 
-                createConfirmDialog(context, listener);
+                createConfirmSaveDialog(context, listener);
             }
         } else {
             if (mNote.getTitle().trim().isEmpty()) {
@@ -350,7 +373,7 @@ public class NoteEditFragment extends Fragment {
                         }
                     };
 
-                    createConfirmDialog(context, listener);
+                    createConfirmSaveDialog(context, listener);
                 }
             } else {
                 if (mUpdated) {
@@ -373,7 +396,7 @@ public class NoteEditFragment extends Fragment {
                         }
                     };
 
-                    createConfirmDialog(context, listener);
+                    createConfirmSaveDialog(context, listener);
                 } else {
                     // If the old note is not updated via field widgets,
                     // exit this fragment and do not save in database
@@ -433,7 +456,7 @@ public class NoteEditFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_cancel_note:
-                cancelNoteFromMenuItem();
+                showConfirmCancelDialog();
                 return true;
             case R.id.menu_item_save_note:
                 saveNoteFromMenuItem();
