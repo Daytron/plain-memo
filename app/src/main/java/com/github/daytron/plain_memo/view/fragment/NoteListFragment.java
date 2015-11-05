@@ -665,10 +665,10 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         String subtitle = getResources().getQuantityString(R.plurals.subtitle_plural,
                 noteCount, noteCount);
 
-        if (!mSubtitleVisible) {
+        if (!mSubtitleVisible || noteCount == 0) {
             subtitle = null;
         }
-
+        
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         ActionBar actionBar = activity.getSupportActionBar();
         if (actionBar != null) actionBar.setSubtitle(subtitle);
