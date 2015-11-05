@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.LabeledIntent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,8 +33,10 @@ import com.github.daytron.plain_memo.model.Note;
 import com.github.daytron.plain_memo.util.DateUtil;
 import com.github.daytron.plain_memo.view.NoteEditActivity;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -409,14 +415,52 @@ public class NoteViewFragment extends Fragment {
     private void shareNote() {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
+        intent.setType("text/plain");
 
+        // Prepare text data
         StringBuilder textData = new StringBuilder();
         textData.append(mNote.getTitle())
                 .append(". ")
                 .append(mNote.getBody());
-        intent.putExtra(Intent.EXTRA_TEXT, textData.toString());
-        intent.setType("text/plain");
-        startActivity(Intent.createChooser(intent, getResources().getText(R.string.share_to)));
+
+        PackageManager packageManager = getActivity().getPackageManager();
+        // Look for available applications that has ACTION_SEND intent
+        List<ResolveInfo> listOfAppResolveInfo = packageManager.queryIntentActivities(intent,0);
+
+        String packageNameOfAppToHide = "com.github.daytron.plain_memo";
+        ArrayList<Intent> targetShareIntents = new ArrayList<>();
+
+        if (!listOfAppResolveInfo.isEmpty()) {
+            for (ResolveInfo currentInfo : listOfAppResolveInfo) {
+                String packageName = currentInfo.activityInfo.packageName;
+                String className = currentInfo.activityInfo.name;
+
+                // Only allow any other apps except this application
+                if (!packageNameOfAppToHide.equalsIgnoreCase(packageName)) {
+                    Intent targetIntent = new Intent(Intent.ACTION_SEND);
+                    targetIntent.setPackage(packageName);
+                    targetIntent.setClassName(packageName,className);
+                    targetIntent.setType("text/plain");
+                    targetIntent.putExtra(Intent.EXTRA_TEXT, textData.toString());
+                    targetShareIntents.add(targetIntent);
+                }
+            }
+        }
+
+        if(targetShareIntents.size() > 0) {
+            Intent chooserIntent = Intent.createChooser(targetShareIntents.remove(
+                            targetShareIntents.size() - 1),
+                    getResources().getText(R.string.share_to));
+
+            // Populate chooser with new filtered intents
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
+                    targetShareIntents.toArray(new Parcelable[] {}));
+            startActivity(chooserIntent);
+        } else {
+            Toast.makeText(getActivity(),
+                    getResources().getString(R.string.share_no_app_found),
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void callEditFragment(boolean isNewNote, long offset) {

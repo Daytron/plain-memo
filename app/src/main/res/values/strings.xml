@@ -38,6 +38,7 @@
 
     <!--Share Intent chooser -->
     <string name="share_to">Share to:</string>
+    <string name="share_no_app_found">No app available</string>
 
     <!-- Confirmation dialog -->
     <string name="confirm_dialog_save_title">Confirm Save</string>
