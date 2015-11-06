@@ -213,18 +213,15 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
             String header = getString(R.string.feedback_email_header) + " " +
                     getString(R.string.app_name) + " " + BuildConfig.VERSION_NAME;
 
-            StringBuilder stringMsgBuilder = new StringBuilder();
-            stringMsgBuilder.append(getString(R.string.feedback_email_body_hi))
-                    .append("\n\n")
-                    .append(String.format(getString(R.string.feedback_email_body_content),
-                            deviceName, Build.VERSION.RELEASE))
-                    .append("\n\n");
-
             Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
             String uriString = "mailto:"
                     + Uri.encode(getString(R.string.app_support_email))
                     + "?subject=" + Uri.encode(header) +
-                    "&body=" + Uri.encode(stringMsgBuilder.toString());
+                    "&body=" + Uri.encode(getString(R.string.feedback_email_body_hi))
+                    + "%0D%0A%0D%0A"
+                    + Uri.encode(String.format(getString(R.string.feedback_email_body_content),
+                    deviceName, Build.VERSION.RELEASE))
+                    + "%0D%0A%0D%0A";
             Uri uri = Uri.parse(uriString);
             emailIntent.setData(uri);
 
