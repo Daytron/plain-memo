@@ -30,8 +30,10 @@
     <string name="note_title_label">Title</string>
     <string name="note_title_hint">Title</string>
     <string name="note_body_hint">Note</string>
-    <string name="note_date_created">(created)</string>
-    <string name="note_date_edited">(last edited)</string>
+    <string name="note_date_created">created</string>
+    <string name="note_date_edited">last edited</string>
+    <string name="note_date_time_format">%1$s \u0020 %2$s</string>
+    <string name="note_date_full_format">%1$s %2$s %3$s</string>
 
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>

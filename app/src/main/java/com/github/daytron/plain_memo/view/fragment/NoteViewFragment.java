@@ -220,45 +220,17 @@ public class NoteViewFragment extends Fragment {
     }
 
     private void updateDate() {
-        Calendar created = Calendar.getInstance();
-        created.setTime(mNote.getDateCreated());
-        Calendar edited = Calendar.getInstance();
-        edited.setTime(mNote.getDateEdited());
+        StringBuilder dateTimeFormatted;
 
-        StringBuilder dateTimeFormatted = new StringBuilder();
-
-        final String SPACE = " ";
-        String timeLocaleFormatted;
-        if (mNote.isEdited()) {
-            timeLocaleFormatted = DateUtil
-                    .getTimeStringLocale(getActivity(), mNote.getDateEdited());
-            timeLocaleFormatted += SPACE + getString(R.string.note_date_edited);
-        } else {
-            timeLocaleFormatted = DateUtil
-                    .getTimeStringLocale(getActivity(), mNote.getDateCreated());
-            timeLocaleFormatted += SPACE + getString(R.string.note_date_created);
-        }
-
-        String weekday = DateUtils.formatDateTime(getActivity(),
-                mNote.getDateEdited().getTime(),
-                DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY);
         int valueCompareTo = DateUtil.compareToToday(mNote.getDateEdited());
         switch (valueCompareTo) {
             case 0:
                 // Today
-                dateTimeFormatted.append(weekday)
-                        .append(SPACE)
-                        .append(getString(R.string.today))
-                        .append(SPACE)
-                        .append(timeLocaleFormatted);
+                dateTimeFormatted = buildFullDateString(getString(R.string.today));
                 break;
             case 1:
                 // Yesterday
-                dateTimeFormatted.append(weekday)
-                        .append(SPACE)
-                        .append(getString(R.string.yesterday))
-                        .append(SPACE)
-                        .append(timeLocaleFormatted);
+                dateTimeFormatted = buildFullDateString(getString(R.string.yesterday));
                 break;
             case 2:
                 // Last seven days excluding today and yesterday
@@ -266,36 +238,50 @@ public class NoteViewFragment extends Fragment {
                 String dayAndMonth1 = DateUtils.formatDateTime(getActivity(),
                         mNote.getDateEdited().getTime(),
                         DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_NO_YEAR);
-                dateTimeFormatted.append(weekday)
-                        .append(SPACE)
-                        .append(dayAndMonth1)
-                        .append(SPACE)
-                        .append(timeLocaleFormatted);
+                dateTimeFormatted = buildFullDateString(dayAndMonth1);
                 break;
             case 3:
                 // Within the same year excluding last seven days
                 String dayAndMonth2 = DateUtils.formatDateTime(getActivity(),
                         mNote.getDateEdited().getTime(),
                         DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_NO_YEAR);
-                dateTimeFormatted.append(weekday)
-                        .append(SPACE)
-                        .append(dayAndMonth2)
-                        .append(SPACE)
-                        .append(timeLocaleFormatted);
+                dateTimeFormatted = buildFullDateString(dayAndMonth2);
                 break;
             default:
                 // Last year
                 String dayMonthYear = DateUtils.formatDateTime(getActivity(),
                         mNote.getDateEdited().getTime(),
                         DateUtils.FORMAT_ABBREV_MONTH);
-                dateTimeFormatted.append(weekday)
-                        .append(SPACE)
-                        .append(dayMonthYear)
-                        .append(SPACE)
-                        .append(timeLocaleFormatted);
+                dateTimeFormatted = buildFullDateString(dayMonthYear);
         }
 
         mDateTextView.setText(dateTimeFormatted.toString());
+    }
+
+    private StringBuilder buildFullDateString(String dateFormat) {
+        String weekday = DateUtils.formatDateTime(getActivity(),
+                mNote.getDateEdited().getTime(),
+                DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY);
+
+        String timeLocaleFormatted;
+        if (mNote.isEdited()) {
+            timeLocaleFormatted = getString(R.string.note_date_time_format,
+                    DateUtil.getTimeStringLocale(getActivity(), mNote.getDateEdited()),
+                    getString(R.string.note_date_edited));
+        } else {
+            timeLocaleFormatted = getString(R.string.note_date_time_format,
+                    DateUtil.getTimeStringLocale(getActivity(), mNote.getDateCreated()),
+                    getString(R.string.note_date_created));
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(getString(
+                R.string.note_date_full_format,
+                weekday,
+                dateFormat,
+                timeLocaleFormatted
+        ));
+        return builder;
     }
 
     @Override
