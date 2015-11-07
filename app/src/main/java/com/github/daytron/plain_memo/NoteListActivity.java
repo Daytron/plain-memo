@@ -54,6 +54,10 @@ public class NoteListActivity extends SingleFragmentActivity
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.detail_fragment_container, newNoteDetail)
                     .commit();
+
+            NoteListFragment listFragment = (NoteListFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            listFragment.scrollToLastItem();
         }
     }
 

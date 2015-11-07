@@ -168,6 +168,13 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         Note note = new Note();
         NoteBook.get(getActivity()).addNote(note);
 
+        // Allows auto scroll to last item when a new note is created
+        // for two pane only. List automatically add the new blank note
+        // to the list
+        if (NoteBook.get(getActivity()).isTwoPane()) {
+            updateUI();
+        }
+
         mCallbacks.onNoteSelected(note, true);
     }
 
@@ -682,6 +689,13 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
     }
 
+    public void scrollToLastItem() {
+        int totalItems = mAdapter.getItemCount();
+        if (totalItems > 0) {
+            mNoteRecyclerView.scrollToPosition(totalItems-1);
+        }
+    }
+
     /**
      * Filter the list based on the string entered by the user via {@link SearchView} widget
      * in the toolbar. Filter only by letter and note case sensitive. Any letter match in the
@@ -726,6 +740,15 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             case R.id.menu_item_new_note:
                 Note note = new Note();
                 NoteBook.get(getActivity()).addNote(note);
+
+                // Allows auto scroll to last item when a new note is created
+                // for two pane only. List automatically add the new blank note
+                // to the list, allowing the Recyclerview to scroll to it before
+                // NoteEditFragment is loaded
+                if (NoteBook.get(getActivity()).isTwoPane()) {
+                    updateUI();
+                }
+
                 mCallbacks.onNoteSelected(note, true);
                 return true;
             case R.id.action_settings:
