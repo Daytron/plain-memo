@@ -676,6 +676,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         return true;
     }
 
+    public void scrollToFirstItem() {
+        if (mAdapter.getItemCount() > 0) {
+            mNoteRecyclerView.scrollToPosition(0);
+        }
+    }
+
     /**
      * Filter the list based on the string entered by the user via {@link SearchView} widget
      * in the toolbar. Filter only by letter and note case sensitive. Any letter match in the

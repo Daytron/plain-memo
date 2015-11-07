@@ -76,6 +76,8 @@ public class NoteListActivity extends SingleFragmentActivity
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.detail_fragment_container, replacedNote)
                     .commit();
+            // Then auto scroll to first position
+            listFragment.scrollToFirstItem();
         }
     }
 }
