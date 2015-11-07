@@ -2,6 +2,8 @@ package com.github.daytron.plain_memo.settings;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -248,14 +250,25 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
             Uri uri = Uri.parse(uriString);
             emailIntent.setData(uri);
 
-            try {
-                startActivity(Intent.createChooser(emailIntent,
-                        getString(R.string.feedback_client_selection_title)));
-                getActivity().finish();
-            } catch (android.content.ActivityNotFoundException ex) {
+            PackageManager packageManager = getActivity().getPackageManager();
+            // Look for available applications that has ACTION_SENDTO intent
+            List<ResolveInfo> listOfAppResolveInfo = packageManager
+                    .queryIntentActivities(emailIntent, 0);
+
+            if (!listOfAppResolveInfo.isEmpty()) {
+                try {
+                    startActivity(Intent.createChooser(emailIntent,
+                            getString(R.string.feedback_client_selection_title)));
+                    getActivity().finish();
+                } catch (android.content.ActivityNotFoundException ex) {
+                    Toast.makeText(getActivity(),
+                            getString(R.string.feedback_email_no_client), Toast.LENGTH_SHORT).show();
+                }
+            } else {
                 Toast.makeText(getActivity(),
                         getString(R.string.feedback_email_no_client), Toast.LENGTH_SHORT).show();
             }
+
 
         }
     }
