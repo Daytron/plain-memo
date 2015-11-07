@@ -8,14 +8,19 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.github.daytron.plain_memo.BuildConfig;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.data.GlobalValues;
+import com.github.daytron.plain_memo.database.NoteBook;
 import com.jaredrummler.android.device.DeviceName;
 
 import java.util.Calendar;
@@ -29,10 +34,21 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupToolbarForTwoPane();
+    }
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(R.string.action_settings);
+    private void setupToolbarForTwoPane() {
+        Toolbar toolbar;
+        ViewGroup root = (ViewGroup) findViewById(android.R.id.list).getParent().getParent().getParent();
+        AppBarLayout appBarLayout = (AppBarLayout)LayoutInflater.from(this)
+                .inflate(R.layout.settings_toolbar, root, false);
+
+        root.addView(appBarLayout,0);
+        toolbar = (Toolbar) root.findViewById(R.id.setting_toolbar);
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.action_settings);
     }
 
     /**
@@ -118,18 +134,25 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
                             }
                         });
 
-                ((UserPreferenceActivity) getActivity())
-                        .getSupportActionBar()
-                        .setTitle(getString(R.string.pref_general));
+                // Only change settings title in the toolbar if single pane
+                if (!NoteBook.get(getActivity()).isTwoPane()) {
+                    ((UserPreferenceActivity) getActivity())
+                            .getSupportActionBar()
+                            .setTitle(getString(R.string.pref_general));
+                }
+
 
                 initChangelogPref();
                 initAboutPreference();
             } else {
                 addPreferencesFromResource(R.xml.settings_appearance);
 
-                ((UserPreferenceActivity) getActivity())
-                        .getSupportActionBar()
-                        .setTitle(getString(R.string.pref_appearance));
+                // Only change settings title in the toolbar if single pane
+                if (!NoteBook.get(getActivity()).isTwoPane()) {
+                    ((UserPreferenceActivity) getActivity())
+                            .getSupportActionBar()
+                            .setTitle(getString(R.string.pref_appearance));
+                }
             }
         }
 

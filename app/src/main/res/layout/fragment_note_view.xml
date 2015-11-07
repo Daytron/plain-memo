@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView android:id="@+id/scrollView1"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorBackgroundNoteBody">
+<ScrollView
+    android:id="@+id/scrollView1"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackgroundNoteBody">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,8 +18,8 @@
             android:background="@color/colorBackgroundNoteTitle"
             android:orientation="vertical"
             android:paddingBottom="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:paddingEnd="@dimen/note_view_padding_left_right"
+            android:paddingStart="@dimen/note_view_padding_left_right"
             android:paddingTop="20dp">
 
             <TextView
@@ -52,9 +53,9 @@
             fontPath="fonts/OpenSans-Regular.ttf"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="10dp"
+            android:paddingEnd="@dimen/note_view_padding_left_right"
+            android:paddingStart="@dimen/note_view_padding_left_right"
+            android:paddingTop="@dimen/note_view_body_padding_top"
             android:textColor="@color/colorFontNormal"
             tools:ignore="MissingPrefix"
             tools:text="This is a note"/>

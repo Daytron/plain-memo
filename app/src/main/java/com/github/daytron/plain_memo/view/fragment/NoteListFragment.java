@@ -1,12 +1,12 @@
 package com.github.daytron.plain_memo.view.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
@@ -29,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.github.daytron.plain_memo.NoteListActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
@@ -40,11 +38,13 @@ import com.github.daytron.plain_memo.view.NotePagerActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by ryan on 27/10/15.
  */
-public class NoteListFragment extends Fragment implements SearchView.OnQueryTextListener {
+public class NoteListFragment extends Fragment implements SearchView.OnQueryTextListener,
+        View.OnClickListener, SearchView.OnCloseListener {
 
     private final String ARG_QUERY_SEARCH_STRING = "query_search_string";
     private final String ARG_SEARCHVIEW_MENU_EXPANDED = "searchview_menu_expanded";
@@ -61,6 +61,15 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     private boolean mSubtitleVisible;
     private boolean isDBClose = false;
     private boolean mSearchViewMenuItemExpanded = false;
+
+    private Callbacks mCallbacks;
+
+    /**
+     * Required interface for hosting activities.
+     */
+    public interface Callbacks {
+        void onNoteSelected(Note note, boolean isNewNote);
+    }
 
     /**
      * Called to do initial creation of a fragment.  This is called after
@@ -122,23 +131,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         mEmptyTextView = (TextView) view.findViewById(R.id.note_empty_text_view);
         mEmptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        ((NoteListActivity) getActivity()).setSupportActionBar(toolbar);
-
         mNoteRecyclerView = (RecyclerView) view.findViewById(R.id.note_recycler_view);
         mNoteRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab_add);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Note note = new Note();
-                NoteBook.get(getActivity()).addNote(note);
-
-                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), true);
-                startActivity(intent);
-            }
-        });
 
         updateUI();
 
@@ -164,7 +158,20 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         return view;
     }
 
-    private void updateUI() {
+    /**
+     * Called when fab icon button has been clicked. Creates a new note.
+     *
+     * @param v The view that was clicked.
+     */
+    @Override
+    public void onClick(View v) {
+        Note note = new Note();
+        NoteBook.get(getActivity()).addNote(note);
+
+        mCallbacks.onNoteSelected(note, true);
+    }
+
+    public void updateUI() {
         // Update list (for new changes)
         mListOfNotes = NoteBook.get(getActivity()).getNotes();
 
@@ -198,6 +205,28 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
 
         updateSubtitle();
+    }
+
+    /**
+     * Called when a fragment is first attached to its context.
+     * {@link #onCreate(Bundle)} will be called after this.
+     *
+     * @param context
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    /**
+     * Called when the fragment is no longer attached to its activity.  This
+     * is called after {@link #onDestroy()}.
+     */
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
     /**
@@ -371,9 +400,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
          */
         @Override
         public void onClick(View v) {
-            Intent intent = NotePagerActivity.newIntent(getActivity(), mNote.getID(), false);
-            startActivity(intent);
+            mCallbacks.onNoteSelected(mNote, false);
         }
+    }
+
+    public UUID getFirstNoteFromList() {
+        return ((mAdapter == null) ? null : mAdapter.getFirstItem());
     }
 
     private class NoteListAdapter extends RecyclerView.Adapter<NoteHolder> {
@@ -382,6 +414,14 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         public NoteListAdapter(List<Note> notes) {
             mNotes = new ArrayList<>(notes);
+        }
+
+        public UUID getFirstItem() {
+            if (getItemCount() > 0) {
+                return mNotes.get(0).getID();
+            } else {
+                return null;
+            }
         }
 
         /**
@@ -580,6 +620,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         final MenuItem searchViewItem = menu.findItem(R.id.menu_item_search_note);
         mSearchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
         mSearchView.setOnQueryTextListener(this);
+        mSearchView.setOnCloseListener(this);
 
         // Apply search filter when configuration is changed (e.g. screen rotation)
         // only when searchview is active from previous configuration or screen
@@ -589,6 +630,18 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             mSearchView.setIconified(false);
             mSearchView.requestFocusFromTouch();
         }
+    }
+
+    /**
+     * The user is attempting to close the SearchView.
+     *
+     * @return true if the listener wants to override the default behavior of clearing the
+     * text field and dismissing it, false otherwise.
+     */
+    @Override
+    public boolean onClose() {
+        mSearchViewMenuItemExpanded = false;
+        return false;
     }
 
     /**
@@ -667,8 +720,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             case R.id.menu_item_new_note:
                 Note note = new Note();
                 NoteBook.get(getActivity()).addNote(note);
-                Intent intent = NotePagerActivity.newIntent(getActivity(), note.getID(), true);
-                startActivity(intent);
+                mCallbacks.onNoteSelected(note, true);
                 return true;
             case R.id.action_settings:
                 Intent intentPreference = new Intent(getActivity(), UserPreferenceActivity.class);

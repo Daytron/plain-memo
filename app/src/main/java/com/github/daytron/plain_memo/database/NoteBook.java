@@ -22,6 +22,7 @@ public class NoteBook {
     private final Context mContext;
     private final SQLiteDatabase mDatabase;
     private final NotesDatabaseManager notesDbManager;
+    private boolean isTwoPane;
 
     public static NoteBook get(Context appContext) {
         if (sNoteBook == null) {
@@ -35,6 +36,7 @@ public class NoteBook {
         mContext = context.getApplicationContext();
         notesDbManager = new NotesDatabaseManager(mContext);
         mDatabase = notesDbManager.getDatabase();
+        isTwoPane = false;
     }
 
     public List<Note> getNotes() {
@@ -54,6 +56,38 @@ public class NoteBook {
         return notes;
     }
 
+    public Note getFirstNote() {
+        String orderBy = NoteTable.Cols.UUID + " ASC";
+        String limit = "1";
+        NoteCursorWrapper wrapper = queryNoteByOrderLimit(orderBy, limit);
+
+        try {
+            if (wrapper.getCount() == 0) {
+                return null;
+            }
+
+            wrapper.moveToFirst();
+            return wrapper.getNote();
+        } finally {
+            wrapper.close();
+        }
+    }
+
+    private NoteCursorWrapper queryNoteByOrderLimit(String orderBy, String limit) {
+        Cursor cursor = mDatabase.query(
+                NoteTable.NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                orderBy,
+                limit
+        );
+
+        return new NoteCursorWrapper(cursor);
+    }
+
     private NoteCursorWrapper queryAllNotes(String whereClause, String[] whereArgs) {
         Cursor cursor = mDatabase.query(
                 NoteTable.NAME,
@@ -67,6 +101,8 @@ public class NoteBook {
 
         return new NoteCursorWrapper(cursor);
     }
+
+
 
     public Note getNote(UUID uuid) {
         String whereClause = NoteTable.Cols.UUID + " = ?";
@@ -118,6 +154,14 @@ public class NoteBook {
         mDatabase.delete(NoteTable.NAME,
                 NoteTable.Cols.UUID + " = ?",
                 new String[]{uuidString});
+    }
+
+    public boolean isTwoPane() {
+        return isTwoPane;
+    }
+
+    public void setIsTwoPane(boolean isTwoPane) {
+        this.isTwoPane = isTwoPane;
     }
 
     public boolean closeDatabase() {

@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.database.NoteBook;
@@ -50,10 +51,14 @@ public class NotePagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_pager);
 
-        final UUID crimeId = (UUID) getIntent().getSerializableExtra(EXTRA_NOTE_ID);
-        final boolean isNewNote = getIntent().getBooleanExtra(EXTRA_NOTE_IS_NEW,false);
+        final UUID noteId = (UUID) getIntent().getSerializableExtra(EXTRA_NOTE_ID);
+        final boolean isNewNote = getIntent().getBooleanExtra(EXTRA_NOTE_IS_NEW, false);
 
         mViewPager = (ViewPager) findViewById(R.id.activity_note_pager_view_pager);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mNotes = NoteBook.get(this).getNotes();
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -61,7 +66,7 @@ public class NotePagerActivity extends AppCompatActivity {
             @Override
             public Fragment getItem(int position) {
                 Note note = mNotes.get(position);
-                if (crimeId.equals(note.getID())) {
+                if (noteId.equals(note.getID())) {
                     return NoteViewFragment.newInstance(note.getID(), isNewNote);
                 } else {
                     return NoteViewFragment.newInstance(note.getID(), false);
@@ -76,7 +81,7 @@ public class NotePagerActivity extends AppCompatActivity {
         });
 
         for (int i = 0; i < mNotes.size(); i++) {
-            if (mNotes.get(i).getID().equals(crimeId)) {
+            if (mNotes.get(i).getID().equals(noteId)) {
                 mViewPager.setCurrentItem(i);
                 break;
             }

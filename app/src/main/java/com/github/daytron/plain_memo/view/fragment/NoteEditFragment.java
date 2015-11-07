@@ -121,7 +121,7 @@ public class NoteEditFragment extends Fragment {
         // Change titlebar text
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         ActionBar actionBar = activity.getSupportActionBar();
-        String titleText = ((mNewNote) ? getResources().getString(R.string.toolbar_title_new_note):
+        String titleText = ((mNewNote) ? getResources().getString(R.string.toolbar_title_new_note) :
                 getResources().getString(R.string.toolbar_title_edit_note));
         if (actionBar != null) actionBar.setTitle(titleText);
 

@@ -1,6 +1,7 @@
 package com.github.daytron.plain_memo.view.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -55,6 +56,12 @@ public class NoteViewFragment extends Fragment {
 
     private boolean mNewNote;
     private boolean mSingleTouchEdit;
+
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+        void onNoteDelete();
+    }
 
     public static NoteViewFragment newInstance(UUID noteId, boolean isNewNote) {
         Bundle args = new Bundle();
@@ -129,10 +136,12 @@ public class NoteViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_note_view, container, false);
 
-        // Remove titlebar text
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        ActionBar actionBar = activity.getSupportActionBar();
-        if (actionBar != null) actionBar.setDisplayShowTitleEnabled(false);
+        if (!NoteBook.get(getActivity()).isTwoPane()) {
+            // Remove titlebar text if single pane only
+            AppCompatActivity activity = (AppCompatActivity) getActivity();
+            ActionBar actionBar = activity.getSupportActionBar();
+            if (actionBar != null) actionBar.setDisplayShowTitleEnabled(false);
+        }
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mSingleTouchEdit = sharedPref
@@ -196,6 +205,31 @@ public class NoteViewFragment extends Fragment {
 
         updateDate();
         return v;
+    }
+
+    /**
+     * Called when a fragment is first attached to its context.
+     * {@link #onCreate(Bundle)} will be called after this.
+     *
+     * @param context
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (NoteBook.get(getActivity()).isTwoPane()) {
+            mCallbacks = (Callbacks) context;
+        }
+
+    }
+
+    /**
+     * Called when the fragment is no longer attached to its activity.  This
+     * is called after {@link #onDestroy()}.
+     */
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
     /**
@@ -312,7 +346,14 @@ public class NoteViewFragment extends Fragment {
 
                 if (isForDeletion) {
                     NoteBook.get(getActivity()).deleteNote(mNote);
-                    getActivity().finish();
+
+                    // Since in two pane NoteViewFragment and NoteListFragment
+                    // share the same activity, no need to destroy the activity.
+                    if (NoteBook.get(getActivity()).isTwoPane()) {
+                        mCallbacks.onNoteDelete();
+                    } else {
+                        getActivity().finish();
+                    }
                 }
 
                 Toast.makeText(getActivity(), R.string.toast_note_cancel_save_operation,
@@ -471,7 +512,13 @@ public class NoteViewFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         NoteBook noteBook = NoteBook.get(getActivity());
                         noteBook.deleteNote(mNote);
-                        getActivity().finish();
+
+                        if (NoteBook.get(getActivity()).isTwoPane()) {
+                            mCallbacks.onNoteDelete();
+                        } else {
+                            getActivity().finish();
+                        }
+
                         Toast.makeText(getActivity(), R.string.toast_note_deletion,
                                 Toast.LENGTH_SHORT).show();
                     }
