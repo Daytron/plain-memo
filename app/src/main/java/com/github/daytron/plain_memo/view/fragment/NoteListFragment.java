@@ -48,6 +48,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
     private final String ARG_QUERY_SEARCH_STRING = "query_search_string";
     private final String ARG_SEARCHVIEW_MENU_EXPANDED = "searchview_menu_expanded";
+    private final String ARG_SELECTED_NOTE_HIGHLIGHT = "selected_note_higlight";
 
     private LinearLayout mContentLinearLayout;
     private TextView mEmptyTextView;
@@ -61,6 +62,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     private boolean mSubtitleVisible;
     private boolean isDBClose = false;
     private boolean mSearchViewMenuItemExpanded = false;
+
+    private int mSelectedNotePos = 0;
 
     private Callbacks mCallbacks;
 
@@ -262,6 +265,10 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         mSearchViewMenuItemExpanded = !(mSearchView != null && mSearchView.isIconified());
         outState.putBoolean(ARG_SEARCHVIEW_MENU_EXPANDED, mSearchViewMenuItemExpanded);
+
+        if (NoteBook.get(getActivity()).isTwoPane()) {
+            outState.putInt(ARG_SELECTED_NOTE_HIGHLIGHT, mSelectedNotePos);
+        }
     }
 
     /**
@@ -285,6 +292,26 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             mCurrentFilterQuery = savedInstanceState.getString(ARG_QUERY_SEARCH_STRING);
             mSearchViewMenuItemExpanded = savedInstanceState
                     .getBoolean(ARG_SEARCHVIEW_MENU_EXPANDED);
+
+            if (NoteBook.get(getActivity()).isTwoPane()) {
+                mSelectedNotePos = savedInstanceState.getInt(ARG_SELECTED_NOTE_HIGHLIGHT);
+
+                // Apply note highlight
+                // By default top (position 0) is selected, when activity/fragment is created
+
+                // Clear highlight/selection
+                mAdapter.notifyItemChanged(0);
+
+                // Select back to its previous selection from its last screen orientation
+                mAdapter.notifyItemChanged(mSelectedNotePos);
+
+                Note selectedNote = mAdapter.getNoteByPos(mSelectedNotePos);
+                if (selectedNote != null) {
+                    mNoteRecyclerView.scrollToPosition(mSelectedNotePos);
+                    mCallbacks.onNoteSelected(selectedNote, false);
+                }
+            }
+
         }
     }
 
@@ -337,13 +364,21 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         private final TextView mTitleTextView;
         private final TextView mDateTextView;
+        private final LinearLayout mLinearLayout;
+
+        private final int mSelectedColor;
+        private final int mDefaultBgColor;
 
         public NoteHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
 
+            mSelectedColor = ContextCompat.getColor(getActivity(), R.color.colorNoteSelectedItem);
+            mDefaultBgColor = ContextCompat.getColor(getActivity(), R.color.colorBackgroundNoteBody);
+
             mTitleTextView = (TextView) itemView.findViewById(R.id.list_item_note_title_text_view);
             mDateTextView = (TextView) itemView.findViewById(R.id.list_item_note_date_text_view);
+            mLinearLayout = (LinearLayout) itemView.findViewById(R.id.list_item_linearlayout);
         }
 
         public void bindCrime(Note note) {
@@ -401,12 +436,31 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
 
         /**
+         * Apply necessary background color to represent item selection and deselection.
+         *
+         * @param isSelected Boolean value if the particular ViewHolder is the selected note.
+         */
+        public void setSelection(boolean isSelected) {
+            if (isSelected) {
+                mLinearLayout.setBackgroundColor(mSelectedColor);
+            } else {
+                mLinearLayout.setBackgroundColor(mDefaultBgColor);
+            }
+        }
+
+        /**
          * Called when a view has been clicked.
          *
          * @param v The view that was clicked.
          */
         @Override
         public void onClick(View v) {
+            if (NoteBook.get(getActivity()).isTwoPane()) {
+                mAdapter.notifyItemChanged(mSelectedNotePos);
+                mSelectedNotePos = getLayoutPosition();
+                mAdapter.notifyItemChanged(mSelectedNotePos);
+            }
+
             mCallbacks.onNoteSelected(mNote, false);
         }
     }
@@ -418,9 +472,15 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     private class NoteListAdapter extends RecyclerView.Adapter<NoteHolder> {
 
         private List<Note> mNotes;
+        private final boolean isMasterDetail;
 
         public NoteListAdapter(List<Note> notes) {
             mNotes = new ArrayList<>(notes);
+
+            // Save processing expense by saving the device setup config as
+            // instance variable, instead of accessing NoteBook
+            // every time onBindViewHolder is called
+            isMasterDetail = NoteBook.get(getActivity()).isTwoPane();
         }
 
         public UUID getFirstItem() {
@@ -429,6 +489,27 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             } else {
                 return null;
             }
+        }
+
+        public Note getNoteByPos(int pos) {
+            try {
+                return mNotes.get(pos);
+            } catch (IndexOutOfBoundsException ex) {
+                return null;
+            }
+        }
+
+        /**
+         * Called by RecyclerView when it starts observing this Adapter.
+         * <p/>
+         * Keep in mind that same adapter may be observed by multiple RecyclerViews.
+         *
+         * @param recyclerView The RecyclerView instance which started observing this adapter.
+         * @see #onDetachedFromRecyclerView(RecyclerView)
+         */
+        @Override
+        public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+            super.onAttachedToRecyclerView(recyclerView);
         }
 
         /**
@@ -484,6 +565,11 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         public void onBindViewHolder(NoteHolder holder, int position) {
             final Note note = mNotes.get(position);
             holder.bindCrime(note);
+
+            // Only apply item highlight/selection on master detail config
+            if (isMasterDetail) {
+                holder.setSelection(mSelectedNotePos == position);
+            }
         }
 
         /**
@@ -686,13 +772,25 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     public void scrollToFirstItem() {
         if (mAdapter.getItemCount() > 0) {
             mNoteRecyclerView.scrollToPosition(0);
+
+            // Prepare to be automatically highlighted
+            int oldPos = mSelectedNotePos;
+            mSelectedNotePos = 0;
+            mAdapter.notifyItemChanged(mSelectedNotePos);
+            mAdapter.notifyItemChanged(oldPos);
         }
     }
 
     public void scrollToLastItem() {
         int totalItems = mAdapter.getItemCount();
         if (totalItems > 0) {
-            mNoteRecyclerView.scrollToPosition(totalItems-1);
+            mNoteRecyclerView.scrollToPosition(totalItems - 1);
+
+            // Prepare to be automatically highlighted
+            int oldPos = mSelectedNotePos;
+            mSelectedNotePos = totalItems - 1;
+            mAdapter.notifyItemChanged(mSelectedNotePos);
+            mAdapter.notifyItemChanged(oldPos);
         }
     }
 

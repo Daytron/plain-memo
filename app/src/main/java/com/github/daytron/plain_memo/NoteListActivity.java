@@ -45,19 +45,21 @@ public class NoteListActivity extends SingleFragmentActivity
     @Override
     public void onNoteSelected(Note note, boolean isNewNote) {
         if (findViewById(R.id.detail_fragment_container) == null) {
-            NoteBook.get(this).setIsTwoPane(false);
             Intent intent = NotePagerActivity.newIntent(this, note.getID(), isNewNote);
             startActivity(intent);
         } else {
-            NoteBook.get(this).setIsTwoPane(true);
             Fragment newNoteDetail = NoteViewFragment.newInstance(note.getID(), isNewNote);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.detail_fragment_container, newNoteDetail)
                     .commit();
 
-            NoteListFragment listFragment = (NoteListFragment)
-                    getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-            listFragment.scrollToLastItem();
+            // Auto scroll to last item when creating a new note. A new note is placed
+            // at the bottom by the Adapter.
+            if (isNewNote) {
+                NoteListFragment listFragment = (NoteListFragment)
+                        getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+                listFragment.scrollToLastItem();
+            }
         }
     }
 
