@@ -60,7 +60,10 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     private String mCurrentFilterQuery;
 
     private boolean mSubtitleVisible;
-    private boolean isDBClose = false;
+    private boolean mIsDBClose = false;
+    private boolean mTwoPaneKeepSearchbarExpandedTriggered = false;
+    private boolean mTwoPaneJustRotatedScreen = false;
+    private boolean mTwoPaneClickingNoteToExpandSearch;
     private boolean mSearchViewMenuItemExpanded = false;
 
     private int mSelectedNotePos = 0;
@@ -72,6 +75,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
      */
     public interface Callbacks {
         void onNoteSelected(Note note, boolean isNewNote);
+
+        Note getCurrentNoteDisplayedInDetailFragment();
     }
 
     /**
@@ -171,12 +176,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         Note note = new Note();
         NoteBook.get(getActivity()).addNote(note);
 
-        // Allows auto scroll to last item when a new note is created
-        // for two pane only. List automatically add the new blank note
-        // to the list
-        if (NoteBook.get(getActivity()).isTwoPane()) {
-            updateUI();
-        }
+        clearSearchForTwoPane();
 
         mCallbacks.onNoteSelected(note, true);
     }
@@ -295,23 +295,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
             if (NoteBook.get(getActivity()).isTwoPane()) {
                 mSelectedNotePos = savedInstanceState.getInt(ARG_SELECTED_NOTE_HIGHLIGHT);
-
-                // Apply note highlight
-                // By default top (position 0) is selected, when activity/fragment is created
-
-                // Clear highlight/selection
-                mAdapter.notifyItemChanged(0);
-
-                // Select back to its previous selection from its last screen orientation
-                mAdapter.notifyItemChanged(mSelectedNotePos);
-
-                Note selectedNote = mAdapter.getNoteByPos(mSelectedNotePos);
-                if (selectedNote != null) {
-                    mNoteRecyclerView.scrollToPosition(mSelectedNotePos);
-                    mCallbacks.onNoteSelected(selectedNote, false);
-                }
+                mNoteRecyclerView.scrollToPosition(mSelectedNotePos);
             }
-
         }
     }
 
@@ -340,7 +325,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     @Override
     public void onPause() {
         super.onPause();
-        isDBClose = NoteBook.get(getActivity()).closeDatabase();
+        mIsDBClose = NoteBook.get(getActivity()).closeDatabase();
     }
 
     /**
@@ -352,7 +337,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         super.onDestroy();
         // Make sure to close database, since onPause is not always
         // guaranteed to be called.
-        if (!isDBClose) {
+        if (!mIsDBClose) {
             NoteBook.get(getActivity()).closeDatabase();
         }
     }
@@ -456,9 +441,14 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         @Override
         public void onClick(View v) {
             if (NoteBook.get(getActivity()).isTwoPane()) {
-                mAdapter.notifyItemChanged(mSelectedNotePos);
+                int oldPos = mSelectedNotePos;
                 mSelectedNotePos = getLayoutPosition();
+                mAdapter.notifyItemChanged(oldPos);
                 mAdapter.notifyItemChanged(mSelectedNotePos);
+
+                // trigger flag for auto expand searchbar when loading a detail fragment
+                // A workaround for toolbar keeps refreshing whenever a detail fragment is loaded
+                mTwoPaneClickingNoteToExpandSearch = !mSearchView.isIconified();
             }
 
             mCallbacks.onNoteSelected(mNote, false);
@@ -497,6 +487,16 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             } catch (IndexOutOfBoundsException ex) {
                 return null;
             }
+        }
+
+        public int getPositionByNote(Note note) {
+            for (int i = 0; i < mNotes.size(); i++) {
+                if (mNotes.get(i).getID().equals(note.getID())) {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         /**
@@ -706,8 +706,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-
-        inflater.inflate(R.menu.fragment_note_list, menu);
+        if (!NoteBook.get(getActivity()).isTwoPane()) {
+            inflater.inflate(R.menu.menu_note_list, menu);
+        }
 
         // Get the SearchView and set its listener
         final MenuItem searchViewItem = menu.findItem(R.id.menu_item_search_note);
@@ -718,10 +719,34 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         // Apply search filter when configuration is changed (e.g. screen rotation)
         // only when searchview is active from previous configuration or screen
         if (mCurrentFilterQuery != null && mSearchViewMenuItemExpanded) {
+            if (NoteBook.get(getActivity()).isTwoPane()) {
+                mTwoPaneJustRotatedScreen = true;
+            }
+
             mSearchView.setQuery(mCurrentFilterQuery, false);
             mSearchView.setFocusable(true);
             mSearchView.setIconified(false);
             mSearchView.requestFocusFromTouch();
+
+            if (NoteBook.get(getActivity()).isTwoPane()) {
+                // Select back to its previous selection from its last screen orientation
+                mAdapter.notifyItemChanged(mSelectedNotePos);
+                mNoteRecyclerView.scrollToPosition(mSelectedNotePos);
+                mTwoPaneJustRotatedScreen = false;
+            }
+        }
+    }
+
+    public void reQuerySearchViewUponClickingFilteredNote() {
+        if (mSearchView.isIconified() && mTwoPaneClickingNoteToExpandSearch) {
+            mTwoPaneKeepSearchbarExpandedTriggered = true;
+
+            mSearchView.setFocusable(true);
+            mSearchView.setIconified(false);
+            mSearchView.setQuery(mCurrentFilterQuery, false);
+            mSearchView.requestFocusFromTouch();
+
+            mTwoPaneKeepSearchbarExpandedTriggered = false;
         }
     }
 
@@ -734,6 +759,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     @Override
     public boolean onClose() {
         mSearchViewMenuItemExpanded = false;
+
         return false;
     }
 
@@ -762,11 +788,58 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
      */
     @Override
     public boolean onQueryTextChange(String newText) {
+        // Remove the previous highlight when filtering only if triggered by the user manually
+        // Some events requires to keep the state of the selection e.g. screen rotation which
+        // automatically calls this method using setQuery method and keeping searchbar expanded
+        // when a detail fragment is loaded where the searchbar is previously active.
+        // Note: loading a detail fragment causes for toolbar to be reloaded, loosing its previous
+        // state
+        if (NoteBook.get(getActivity()).isTwoPane() &&
+                !mTwoPaneKeepSearchbarExpandedTriggered &&
+                !mTwoPaneJustRotatedScreen) {
+            int oldPos = mSelectedNotePos;
+            mSelectedNotePos = -1;
+            mAdapter.notifyItemChanged(oldPos);
+        }
+
         mCurrentFilterQuery = newText.trim();
         mFilteredNotes = filter(mListOfNotes, mCurrentFilterQuery);
         mAdapter.animateTo(mFilteredNotes);
-        mNoteRecyclerView.scrollToPosition(0);
+
+        // Do not trigger when trying to regain SearchView's state through
+        // reQuerySearchViewUponClickingFilteredNote() method and
+        // when rotating screen with SearchView expanded
+        if (!mTwoPaneKeepSearchbarExpandedTriggered &&
+                !mTwoPaneJustRotatedScreen) {
+            mNoteRecyclerView.scrollToPosition(0);
+        }
+
+        if (NoteBook.get(getActivity()).isTwoPane() &&
+                !mTwoPaneKeepSearchbarExpandedTriggered &&
+                !mTwoPaneJustRotatedScreen) {
+            if (newText.trim().isEmpty()) {
+                int pos = getPositionOfDetailedFragment();
+                if (pos > -1) {
+                    mSelectedNotePos = pos;
+                    mAdapter.notifyItemChanged(pos);
+                    mNoteRecyclerView.scrollToPosition(pos);
+                }
+            }
+        }
+
+        updateSubtitle();
         return true;
+    }
+
+    private int getPositionOfDetailedFragment() {
+        if (mCallbacks != null) {
+            Note noteDisplayed = mCallbacks.getCurrentNoteDisplayedInDetailFragment();
+            if (noteDisplayed != null) {
+                return mAdapter.getPositionByNote(noteDisplayed);
+            }
+        }
+
+        return -1;
     }
 
     public void scrollToFirstItem() {
@@ -808,12 +881,34 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
         final List<Note> filteredNoteList = new ArrayList<>();
         for (Note note : notes) {
+            if (note.getTitle() == null) {
+                continue;
+            }
             final String titleText = note.getTitle().toLowerCase();
             if (titleText.contains(queryString)) {
                 filteredNoteList.add(note);
             }
         }
         return filteredNoteList;
+    }
+
+    /**
+     * Use to cancel search query for new actions such as add new note, delete, edit and etc.
+     */
+    public void clearSearchForTwoPane() {
+        if (NoteBook.get(getActivity()).isTwoPane()) {
+            // Make sure this is false, to keep SearchView close when new
+            // detail is loaded after deleting the current detail fragment,
+            // that will call reQuerySearchViewUponClickingFilteredNote() method
+            mTwoPaneClickingNoteToExpandSearch = false;
+
+            // Clear any filtered note by requerying empty string
+            onQueryTextChange("");
+
+            // Try closing the SearchView
+            mSearchView.setIconified(true);
+            mSearchView.onActionViewCollapsed();
+        }
     }
 
     /**
@@ -839,17 +934,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
                 Note note = new Note();
                 NoteBook.get(getActivity()).addNote(note);
 
-                // Allows auto scroll to last item when a new note is created
-                // for two pane only. List automatically add the new blank note
-                // to the list, allowing the Recyclerview to scroll to it before
-                // NoteEditFragment is loaded
-                if (NoteBook.get(getActivity()).isTwoPane()) {
-                    updateUI();
-                }
+                clearSearchForTwoPane();
 
                 mCallbacks.onNoteSelected(note, true);
                 return true;
             case R.id.action_settings:
+                clearSearchForTwoPane();
                 Intent intentPreference = new Intent(getActivity(), UserPreferenceActivity.class);
                 startActivity(intentPreference);
                 return true;
@@ -859,13 +949,16 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     private void updateSubtitle() {
-        NoteBook noteBook = NoteBook.get(getActivity());
-        int noteCount = noteBook.getNotes().size();
-        String subtitle = getResources().getQuantityString(R.plurals.subtitle_plural,
-                noteCount, noteCount);
+        int noteCount = mAdapter.getItemCount();
+        String subtitle;
 
-        if (!mSubtitleVisible || noteCount == 0) {
+        if (!mSubtitleVisible) {
             subtitle = null;
+        } else if (noteCount == 0) {
+            subtitle = getResources().getString(R.string.zero_notes);
+        } else {
+            subtitle = getResources().getQuantityString(R.plurals.subtitle_plural,
+                    noteCount, noteCount);
         }
 
         AppCompatActivity activity = (AppCompatActivity) getActivity();

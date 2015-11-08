@@ -26,6 +26,7 @@
         <item quantity="one">%1$s note</item>
         <item quantity="other">%1$s notes</item>
     </plurals>
+    <string name="zero_notes">No notes found</string>
 
     <string name="note_title_label">Title</string>
     <string name="note_title_hint">Title</string>

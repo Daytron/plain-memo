@@ -434,7 +434,7 @@ public class NoteEditFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_note_edit, menu);
+        inflater.inflate(R.menu.menu_note_edit, menu);
     }
 
     /**

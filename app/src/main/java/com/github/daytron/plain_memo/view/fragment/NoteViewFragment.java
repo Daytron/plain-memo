@@ -61,6 +61,8 @@ public class NoteViewFragment extends Fragment {
 
     public interface Callbacks {
         void onNoteDelete();
+        void keepSearchViewExpandedIfPreviouslyExpanded();
+        void tryToCancelSearchQueryOnNewActions();
     }
 
     public static NoteViewFragment newInstance(UUID noteId, boolean isNewNote) {
@@ -205,6 +207,10 @@ public class NoteViewFragment extends Fragment {
 
         updateDate();
         return v;
+    }
+
+    public Note getCurrentNoteDisplayedForTwoPane() {
+        return mNote;
     }
 
     /**
@@ -406,7 +412,11 @@ public class NoteViewFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_note_view, menu);
+        if (NoteBook.get(getActivity()).isTwoPane()) {
+            mCallbacks.keepSearchViewExpandedIfPreviouslyExpanded();
+        } else {
+            inflater.inflate(R.menu.menu_note_view, menu);
+        }
     }
 
     /**
@@ -429,17 +439,26 @@ public class NoteViewFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_share_note:
+                cancelSearchQueryFromTwoPane();
                 shareNote();
                 return true;
             case R.id.menu_item_edit_note:
+                cancelSearchQueryFromTwoPane();
                 // start edit fragment
                 callEditFragment(false, 0);
                 return true;
             case R.id.menu_item_delete_note:
+                cancelSearchQueryFromTwoPane();
                 showConfirmDeleteDialog();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void cancelSearchQueryFromTwoPane() {
+        if (NoteBook.get(getActivity()).isTwoPane()) {
+            mCallbacks.tryToCancelSearchQueryOnNewActions();
         }
     }
 
@@ -510,6 +529,7 @@ public class NoteViewFragment extends Fragment {
                 .setPositiveButton(R.string.dialog_button_delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
                         NoteBook noteBook = NoteBook.get(getActivity());
                         noteBook.deleteNote(mNote);
 

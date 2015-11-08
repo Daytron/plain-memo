@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".NoteListActivity">
+
+
+    <item
+        android:id="@+id/menu_item_search_note"
+        android:icon="@drawable/ic_menu_search"
+        android:title="@string/search_note"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/menu_item_share_note"
+        android:icon="@drawable/ic_menu_share"
+        android:title="@string/share_note"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_item_edit_note"
+        android:icon="@drawable/ic_menu_edit"
+        android:title="@string/edit_note"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/menu_item_delete_note"
+        android:icon="@drawable/ic_menu_delete"
+        android:title="@string/delete_note"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never"/>
+
+</menu>
