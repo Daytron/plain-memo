@@ -4,10 +4,12 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
-    <color name="colorBackgroundNoteBody">#E8EAF6</color>
+    <color name="colorBackgroundNoteListBody">#E8EAF6</color>
+    <color name="colorBackgroundNoteViewBody">#E8EAF6</color>
     <color name="colorBackgroundNoteTitle">#DEE0EA</color>
     <color name="colorNoteItemSeparator">#CCCCCC</color>
-    <color name="colorNoteSelectedItem">#C5CAE9</color>
+    <color name="colorNoteViewSeparator">#CCCCCC</color>
+    <color name="colorNoteSelectedItem">#E8EAF6</color>
 
     <!--
     First 2 values represent opacity in hex (base16)

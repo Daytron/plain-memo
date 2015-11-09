@@ -23,7 +23,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="3.5"
             android:drawablePadding="5dp"
-            android:drawableStart="@drawable/ic_note_icon"
             android:gravity="center_vertical"
             android:paddingTop="5dp"
             android:textColor="@color/colorFontSemibold"

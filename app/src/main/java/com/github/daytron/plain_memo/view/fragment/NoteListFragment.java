@@ -123,7 +123,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         View view = inflater.inflate(R.layout.fragment_note_list, container, false);
 
         // ContextCompat allows app to choose between pre SDK 23 and above for getColor method
-        int bgColor = ContextCompat.getColor(getActivity(), R.color.colorBackgroundNoteBody);
+        int bgColor = ContextCompat.getColor(getActivity(), R.color.colorBackgroundNoteListBody);
 
         mContentLinearLayout = (LinearLayout) view.findViewById(R.id.note_linear_layout_bg);
         mContentLinearLayout.setBackgroundColor(bgColor);
@@ -359,9 +359,17 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             itemView.setOnClickListener(this);
 
             mSelectedColor = ContextCompat.getColor(getActivity(), R.color.colorNoteSelectedItem);
-            mDefaultBgColor = ContextCompat.getColor(getActivity(), R.color.colorBackgroundNoteBody);
+            mDefaultBgColor = ContextCompat.getColor(getActivity(), R.color.colorBackgroundNoteListBody);
 
             mTitleTextView = (TextView) itemView.findViewById(R.id.list_item_note_title_text_view);
+            if (NoteBook.get(getActivity()).isTwoPane()) {
+                int imgResource = R.drawable.ic_note_icon_light;
+                mTitleTextView.setCompoundDrawablesWithIntrinsicBounds(imgResource, 0, 0, 0);
+            } else {
+                int imgResource = R.drawable.ic_note_icon;
+                mTitleTextView.setCompoundDrawablesWithIntrinsicBounds(imgResource, 0, 0, 0);
+            }
+
             mDateTextView = (TextView) itemView.findViewById(R.id.list_item_note_date_text_view);
             mLinearLayout = (LinearLayout) itemView.findViewById(R.id.list_item_linearlayout);
         }
@@ -428,8 +436,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         public void setSelection(boolean isSelected) {
             if (isSelected) {
                 mLinearLayout.setBackgroundColor(mSelectedColor);
+                int imgResource = R.drawable.ic_note_icon;
+                mTitleTextView.setCompoundDrawablesWithIntrinsicBounds(imgResource, 0, 0, 0);
             } else {
                 mLinearLayout.setBackgroundColor(mDefaultBgColor);
+                int imgResource = R.drawable.ic_note_icon_light;
+                mTitleTextView.setCompoundDrawablesWithIntrinsicBounds(imgResource, 0, 0, 0);
             }
         }
 
