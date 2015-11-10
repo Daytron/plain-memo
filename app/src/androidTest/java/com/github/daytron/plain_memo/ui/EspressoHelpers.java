@@ -16,7 +16,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 /**
- * Created by ryan on 10/11/15.
+ * Espresso test for UI events in the NoteListFragment
  */
 public class EspressoHelpers {
 

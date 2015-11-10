@@ -28,9 +28,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 /**
- * Custom helpers for Espresso tests
- * <p/>
- * Created by ryan on 10/11/15.
+ * Custom helpers for Espresso tests.
  */
 @RunWith(AndroidJUnit4.class)
 @LargeTest

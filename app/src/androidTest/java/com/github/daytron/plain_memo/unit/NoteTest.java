@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Unite Test class for Note.class
+ * Unit Test class for Note.class
  *
  * Created by ryan on 10/11/15.
  */

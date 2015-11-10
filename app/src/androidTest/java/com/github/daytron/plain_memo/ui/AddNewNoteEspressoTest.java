@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Created by ryan on 10/11/15.
+ * Espresso test for many UI events of adding new note.
  */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -52,16 +52,6 @@ public class AddNewNoteEspressoTest {
         // Verify that it return back to note list screen
         EspressoHelpers.verifyCurrentScreenIsHome();
     }
-
-
-    /*****************
-     * Helper Methods
-     *****************/
-
-    private void deleteNoteFromNoteView() {
-        EspressoHelpers.deleteNoteFromView(A_SAMPLE_TITLE_TEXT);
-    }
-
 
     /***************
      * Actual Tests
@@ -115,7 +105,7 @@ public class AddNewNoteEspressoTest {
         EspressoHelpers.openANoteFromListAndVerify(A_SAMPLE_TITLE_TEXT);
 
         // Cleanup
-        deleteNoteFromNoteView();
+        EspressoHelpers.deleteNoteFromView(A_SAMPLE_TITLE_TEXT);
     }
 
     @Test
@@ -123,7 +113,7 @@ public class AddNewNoteEspressoTest {
         EspressoHelpers.enterATitleFromEditNoteScreenAndSave(A_SAMPLE_TITLE_TEXT);
 
         // Cleanup process delete extra note created
-        deleteNoteFromNoteView();
+        EspressoHelpers.deleteNoteFromView(A_SAMPLE_TITLE_TEXT);
     }
 
 }
