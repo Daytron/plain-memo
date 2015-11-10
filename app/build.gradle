@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
-
     defaultConfig {
         applicationId "com.github.daytron.plain_memo"
         minSdkVersion 18
@@ -21,6 +20,12 @@ android {
     packagingOptions {
         exclude 'LICENSE.txt'
     }
+    productFlavors {
+        beta {
+            applicationId 'com.github.daytron.plain_memo.beta'
+            versionName '1.0 Beta'
+        }
+    }
 }
 
 dependencies {
@@ -31,7 +36,7 @@ dependencies {
     // Set this dependency to use JUnit 4 rules
     androidTestCompile 'com.android.support.test:rules:0.4.1'
     // Set this dependency to build and run Espresso tests
-    androidTestCompile ('com.android.support.test.espresso:espresso-contrib:2.2.1'){
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2.1') {
         exclude group: 'com.android.support', module: 'appcompat'
         exclude group: 'com.android.support', module: 'support-v4'
         exclude module: 'recyclerview-v7'
