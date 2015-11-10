@@ -18,7 +18,7 @@ public class ApplicationTest extends InstrumentationTestCase {
     private static final String APP_PACKAGE = NoteListActivity.class.getPackage().getName();
 
     private static final long LAUNCH_TIMEOUT = 10000;
-    private static final long UI_TIMEOUT = 10000;
+    private static final long UI_TIMEOUT = 15000;
 
     private UiDevice mDevice;
 
@@ -46,7 +46,7 @@ public class ApplicationTest extends InstrumentationTestCase {
 
     public void testAddNewNoteViaFabButton() throws Exception {
         // Given
-        String expResult = "New Note";
+        String expResultString = "New Note";
 
         // When
         // Locate and click the add new note fab button
@@ -61,6 +61,41 @@ public class ApplicationTest extends InstrumentationTestCase {
         UiObject2 titleInToolbar = mDevice.findObject(By.text("New Note"));
         String titleText = titleInToolbar.getText();
 
-        assertEquals(expResult, titleText);
+        assertEquals(expResultString, titleText);
+    }
+
+    public void testAddNewNoteViaOptionsMenu() {
+        // Given
+        String expResultMenuSaveDesc = "Save";
+
+        // When
+        // Locate Options Menu and tap New Note menu item
+        UiObject2 moreOptions = mDevice.findObject(By.desc("More options"));
+        moreOptions.click();
+
+        mDevice.wait(Until.hasObject(By.text("New Note")), UI_TIMEOUT);
+
+        UiObject2 newNoteMenuItem = mDevice.findObject(By.text("New Note"));
+        newNoteMenuItem.click();
+
+        mDevice.wait(Until.hasObject(By.desc("Save")), UI_TIMEOUT);
+
+        // Then
+        // Get text of the title toolbar as reference to verify that the
+        // NoteEditFragment is displayed in the screen
+        UiObject2 menuSaveInToolbar = mDevice.findObject(By.desc("Save"));
+        String titleText = menuSaveInToolbar.getContentDescription();
+
+        assertEquals(expResultMenuSaveDesc, titleText);
+
+        // Cleanup
+        // Delete the newly created note
+        // Tap Cancel menu item
+        UiObject2 menuCancelInToolbar = mDevice.findObject(By.desc("Cancel"));
+        menuCancelInToolbar.click();
+
+        // Exit
+        mDevice.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), UI_TIMEOUT);
+        mDevice.pressBack();
     }
 }
