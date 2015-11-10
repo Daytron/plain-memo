@@ -46,7 +46,7 @@ public class ApplicationTest extends InstrumentationTestCase {
 
     public void testAddNewNoteViaFabButton() throws Exception {
         // Given
-        String expResultString = "New Note";
+        String expResultMenuSaveDesc = "Save";
 
         // When
         // Locate and click the add new note fab button
@@ -56,12 +56,21 @@ public class ApplicationTest extends InstrumentationTestCase {
         mDevice.wait(Until.hasObject(By.text("New Note")), UI_TIMEOUT);
 
         // Then
-        // Get text of the title toolbar as reference to verify that the
-        // NoteEditFragment is displayed in the screen
-        UiObject2 titleInToolbar = mDevice.findObject(By.text("New Note"));
-        String titleText = titleInToolbar.getText();
+        // Get text of the desc content of save menu item in the toolbar as reference
+        // to verify that the NoteEditFragment is displayed in the screen
+        UiObject2 menuSaveInToolbar = mDevice.findObject(By.desc("Save"));
+        String titleText = menuSaveInToolbar.getContentDescription();
 
-        assertEquals(expResultString, titleText);
+        assertEquals(expResultMenuSaveDesc, titleText);
+
+        // Cleanup
+        // Delete the newly created note
+        // Tap Cancel menu item
+        mDevice.pressBack();
+
+        // Exit
+        mDevice.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), UI_TIMEOUT);
+        mDevice.pressBack();
     }
 
     public void testAddNewNoteViaOptionsMenu() {
@@ -81,8 +90,8 @@ public class ApplicationTest extends InstrumentationTestCase {
         mDevice.wait(Until.hasObject(By.desc("Save")), UI_TIMEOUT);
 
         // Then
-        // Get text of the title toolbar as reference to verify that the
-        // NoteEditFragment is displayed in the screen
+        // Get text of the desc content of save menu item in the toolbar as reference
+        // to verify that the NoteEditFragment is displayed in the screen
         UiObject2 menuSaveInToolbar = mDevice.findObject(By.desc("Save"));
         String titleText = menuSaveInToolbar.getContentDescription();
 
@@ -91,8 +100,7 @@ public class ApplicationTest extends InstrumentationTestCase {
         // Cleanup
         // Delete the newly created note
         // Tap Cancel menu item
-        UiObject2 menuCancelInToolbar = mDevice.findObject(By.desc("Cancel"));
-        menuCancelInToolbar.click();
+        mDevice.pressBack();
 
         // Exit
         mDevice.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), UI_TIMEOUT);
