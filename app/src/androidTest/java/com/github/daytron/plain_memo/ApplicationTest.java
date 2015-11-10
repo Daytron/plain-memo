@@ -65,7 +65,6 @@ public class ApplicationTest extends InstrumentationTestCase {
 
         // Cleanup
         // Delete the newly created note
-        // Tap Cancel menu item
         mDevice.pressBack();
 
         // Exit
@@ -99,7 +98,6 @@ public class ApplicationTest extends InstrumentationTestCase {
 
         // Cleanup
         // Delete the newly created note
-        // Tap Cancel menu item
         mDevice.pressBack();
 
         // Exit
