@@ -43,19 +43,14 @@ public class AddNewNoteEspressoTest {
 
     @Before
     public void beforeEachTest() {
-        onView(withText("Plain Memo")).check(matches(isDisplayed()));
-
-        // Find fab button and click
-        onView(withId(R.id.fab_add)).perform(click());
-
-        // Verify the NoteEditFragment is displayed via title EditText widget
-        onView((withId(R.id.note_title_edit_text))).check(matches(isDisplayed()));
+        EspressoHelpers.verifyCurrentScreenIsHome();
+        EspressoHelpers.clickFabNewNoteButtonAndVerifyAction();
     }
 
     @After
     public void afterEachTest() {
         // Verify that it return back to note list screen
-        onView(withText("Plain Memo")).check(matches(isDisplayed()));
+        EspressoHelpers.verifyCurrentScreenIsHome();
     }
 
 
@@ -64,21 +59,9 @@ public class AddNewNoteEspressoTest {
      *****************/
 
     private void deleteNoteFromNoteView() {
-        // Verify the note clicked is the note opened in NoteViewFragment
-        onView(withText(A_SAMPLE_TITLE_TEXT)).check(matches(isDisplayed()));
-
-        // Verify Delete menu item is displayed and click
-        onView(withId(R.id.menu_item_delete_note))
-                .check(matches(isDisplayed()))
-                .perform(click());
-
-        // Confirm delete dialog is shown
-        onView(withText(R.string.confirm_dialog_delete_title)).inRoot(isDialog())
-                .check(matches(isDisplayed()));
-
-        // Click save button on delete dialog
-        onView(withId(android.R.id.button1)).perform(click());
+        EspressoHelpers.deleteNoteFromView(A_SAMPLE_TITLE_TEXT);
     }
+
 
     /***************
      * Actual Tests
@@ -125,21 +108,11 @@ public class AddNewNoteEspressoTest {
 
     @Test
     public void testCreateNoteAndOpenItAgainFromList() {
-        // Find EditText title and start typing text into it
-        onView(withId(R.id.note_title_edit_text)).perform(typeText(A_SAMPLE_TITLE_TEXT));
-
-        // Find save menu button and click
-        onView(withId(R.id.menu_item_save_note)).perform(click());
-
+        EspressoHelpers.enterATitleFromEditNoteScreenAndSave(A_SAMPLE_TITLE_TEXT);
         pressBack();
 
         // Verify RecyclerView is displayed and click the newly created note to open it
-        onView(withId(R.id.note_recycler_view))
-                .check(matches(isDisplayed()))
-                .perform(RecyclerViewActions.actionOnItem(
-                        hasDescendant(withText(A_SAMPLE_TITLE_TEXT)), scrollTo()))
-                .perform(RecyclerViewActions.actionOnItem(
-                        hasDescendant(withText(A_SAMPLE_TITLE_TEXT)), click()));
+        EspressoHelpers.openANoteFromListAndVerify(A_SAMPLE_TITLE_TEXT);
 
         // Cleanup
         deleteNoteFromNoteView();
@@ -147,11 +120,7 @@ public class AddNewNoteEspressoTest {
 
     @Test
     public void testSaveNoteViaMenuSaveClickSave() {
-        // Find EditText title and start typing text into it
-        onView(withId(R.id.note_title_edit_text)).perform(typeText(A_SAMPLE_TITLE_TEXT));
-
-        // Find save menu button and click
-        onView(withId(R.id.menu_item_save_note)).perform(click());
+        EspressoHelpers.enterATitleFromEditNoteScreenAndSave(A_SAMPLE_TITLE_TEXT);
 
         // Cleanup process delete extra note created
         deleteNoteFromNoteView();
