@@ -8,6 +8,7 @@
         android:id="@+id/menu_item_search_note"
         android:icon="@drawable/ic_menu_search"
         android:title="@string/search_note"
+        android:actionViewClass="android.support.v7.widget.SearchView"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="ifRoom"/>
 
