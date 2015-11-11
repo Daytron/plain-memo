@@ -55,7 +55,8 @@ public class NoteViewFragment extends Fragment {
     private TextView mBodyTextView;
 
     private boolean mNewNote;
-    private boolean mSingleTouchEdit;
+    private boolean mSingleTouchEditEnabled;
+    private boolean mIsLongPress;
 
     private Callbacks mCallbacks;
 
@@ -74,6 +75,42 @@ public class NoteViewFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
+    private View.OnLongClickListener mHoldPressedListener = new View.OnLongClickListener() {
+
+        @Override
+        public boolean onLongClick(View pView) {
+            // Do something when your hold starts here.
+            mIsLongPress = true;
+            return true;
+        }
+    };
+
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            view.onTouchEvent(event);
+            // When the touch is released.
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // Detect if the view is currently long pressed.
+                if (mIsLongPress) {
+                    // Do something when the button is released.
+                    mIsLongPress = false;
+                } else {
+                    if (mSingleTouchEditEnabled) {
+                        TextView layout = ((TextView) view);
+                        float x = event.getX() + mBodyTextView.getScrollX();
+                        float y = event.getY() + mBodyTextView.getScrollY();
+                        long offset = layout.getOffsetForPosition(x, y);
+
+                        callEditFragment(false, offset);
+                    }
+                }
+            }
+            return false;
+        }
+    };
 
     /**
      * Called to do initial creation of a fragment.  This is called after
@@ -138,6 +175,8 @@ public class NoteViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_note_view, container, false);
 
+        mIsLongPress = false;
+
         if (!NoteBook.get(getActivity()).isTwoPane()) {
             // Remove titlebar text if single pane only
             AppCompatActivity activity = (AppCompatActivity) getActivity();
@@ -146,7 +185,7 @@ public class NoteViewFragment extends Fragment {
         }
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mSingleTouchEdit = sharedPref
+        mSingleTouchEditEnabled = sharedPref
                 .getBoolean(getString(R.string.pref_appearance_single_tap_edit_key), true);
         String selectedFontSize = sharedPref
                 .getString(getString(R.string.pref_appearance_font_size_key),
@@ -163,7 +202,7 @@ public class NoteViewFragment extends Fragment {
         mTitleTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mSingleTouchEdit) {
+                if (mSingleTouchEditEnabled) {
                     callEditFragment(false, 0);
                 }
             }
@@ -173,24 +212,9 @@ public class NoteViewFragment extends Fragment {
         mBodyTextView.setAllCaps(false);
         mBodyTextView.setText(mNote.getBody());
         mBodyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
-        mBodyTextView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (mSingleTouchEdit) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            TextView layout = ((TextView) v);
-                            float x = event.getX() + mBodyTextView.getScrollX();
-                            float y = event.getY() + mBodyTextView.getScrollY();
-                            long offset = layout.getOffsetForPosition(x, y);
 
-                            callEditFragment(false, offset);
-                            break;
-                    }
-                }
-                return false;
-            }
-        });
+        mBodyTextView.setOnLongClickListener(mHoldPressedListener);
+        mBodyTextView.setOnTouchListener(mTouchListener);
 
         mDateTextView = (TextView) v.findViewById(R.id.note_date_text_view);
         mDateTextView.setAllCaps(false);
@@ -199,7 +223,7 @@ public class NoteViewFragment extends Fragment {
         mDateTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mSingleTouchEdit) {
+                if (mSingleTouchEditEnabled) {
                     callEditFragment(false, 0);
                 }
             }

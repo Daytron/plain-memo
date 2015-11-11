@@ -23,8 +23,8 @@ android {
     productFlavors {
         beta {
             applicationId 'com.github.daytron.plain_memo.beta'
-            versionName '1.1 Beta'
-            versionCode 2
+            versionName '1.0 Beta'
+            versionCode 3
         }
     }
 }
