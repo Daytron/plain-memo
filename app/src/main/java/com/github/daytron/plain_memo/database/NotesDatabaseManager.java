@@ -1,9 +1,15 @@
 package com.github.daytron.plain_memo.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteDbSchema.NoteTable;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by ryan on 27/10/15.
@@ -26,6 +32,21 @@ public class NotesDatabaseManager extends DatabaseManager {
                 NoteTable.Cols.BODY + ", " +
                 NoteTable.Cols.DATE_CREATED + ", " +
                 NoteTable.Cols.DATE_EDITED + ")");
+
+        db.insert(NoteTable.NAME, null, createNewWelcomeNote());
+    }
+
+    private ContentValues createNewWelcomeNote() {
+        ContentValues values = new ContentValues();
+
+        Date date = Calendar.getInstance().getTime();
+        values.put(NoteTable.Cols.UUID, UUID.randomUUID().toString());
+        values.put(NoteTable.Cols.TITLE, GlobalValues.WELCOME_TITLE);
+        values.put(NoteTable.Cols.BODY, GlobalValues.WELCOME_BODY);
+        values.put(NoteTable.Cols.DATE_CREATED, date.getTime());
+        values.put(NoteTable.Cols.DATE_EDITED, date.getTime());
+
+        return values;
     }
 
     @Override
