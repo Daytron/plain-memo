@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Plain Memo</string>
     <string name="app_developer">Ryan Gilera</string>
-    <string name="app_support_email">ryangilera@gmail.com</string>
+    <string name="app_support_email">gilera.ryan@gmail.com</string>
     <string name="app_release_year">2015</string>
     <string name="action_settings">Settings</string>
 
