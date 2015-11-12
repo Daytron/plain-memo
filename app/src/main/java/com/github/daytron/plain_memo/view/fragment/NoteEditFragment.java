@@ -194,35 +194,28 @@ public class NoteEditFragment extends Fragment {
     }
 
     /**
-     * Creates a confirm save dialog with three buttons, yes, no and cancel. Each
+     * Creates a confirm discard note dialog with two action buttons, yes and no. Each
      * button has predefined functions based on {@link android.content.DialogInterface.OnClickListener}
      * listener object passed as argument.
      *
-     * @param listener The DialogInterface.OnClickListener object that can be used as click
-     *                 listener for AlertDialog object.
+     * @param listener Custom listener for various behaviour of the dialog action buttons.
+     * @param resourceDialogMessage String resource as the dialog content text.
      */
-    private void createConfirmSaveDialog(Context context, DialogInterface.OnClickListener listener) {
-        final AlertDialog alertDialog = new AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
-                .setTitle(R.string.confirm_dialog_save_title)
-                .setMessage(R.string.confirm_dialog_save_body)
-                .setPositiveButton(R.string.dialog_button_save, listener)
-                .setNegativeButton(R.string.dialog_button_delete, listener)
-                .setNeutralButton(android.R.string.cancel, listener)
-                .create();
-        alertDialog.show();
-    }
-
-    private void createConfirmCancelDialog(DialogInterface.OnClickListener listener) {
+    private void createConfirmDiscardDialog(DialogInterface.OnClickListener listener,
+                                            int resourceDialogMessage) {
         final AlertDialog alertDialog = new AlertDialog.Builder(
                 getActivity(), R.style.MyAlertDialogStyle)
-                .setTitle(R.string.confirm_dialog_cancel_title)
-                .setMessage(R.string.confirm_dialog_cancel_body)
+                .setMessage(resourceDialogMessage)
                 .setPositiveButton(R.string.dialog_button_yes, listener)
                 .setNegativeButton(R.string.dialog_button_no, listener)
                 .create();
         alertDialog.show();
     }
 
+    /**
+     * Initiate save note process via menu item. If no title is found, belay save and
+     * notify user. Otherwise, set result to save note.
+     */
     private void saveNoteFromMenuItem() {
         if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()) {
             Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
@@ -235,7 +228,24 @@ public class NoteEditFragment extends Fragment {
         }
     }
 
-    private void showConfirmCancelDialog() {
+    /**
+     * Initiate discard note process via menu item. Pressing no button in dialog, cancels the dialog.
+     * Pressing yes triggers various behaviours depending on the state of the note. The
+     * following are the behaviours outline for pressing discard button in menu item:
+     *
+     * <ul>
+     *     <li>If it is a new note and it is not updated,
+     *      set result to discard the new note and return to home.</li>
+     *     <li>If it is a new note and it is updated, it launches discard dialog.
+     *     Pressing yes sets result to discard the new note and return to home screen.</li>
+     *     <li>If it is an old note and note is not updated, return back to note view screen.</li>
+     *     <li>If it is an old note and note is updated, it launches discard dialog.
+     *     Pressing yes sets result to  discard new changes and revert to its previous state.
+     *     Return to note view screen.</li>
+     * </ul>
+     *
+     */
+    private void discardNoteFromMenuItem() {
         if (mNewNote) {
             if (mUpdated) {
                 DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -253,7 +263,8 @@ public class NoteEditFragment extends Fragment {
                     }
                 };
 
-                createConfirmCancelDialog(listener);
+                createConfirmDiscardDialog(listener,
+                        R.string.confirm_dialog_discard_new_note);
             } else {
                 sendResult(Activity.RESULT_CANCELED, true);
                 getActivity().finish();
@@ -275,7 +286,8 @@ public class NoteEditFragment extends Fragment {
                     }
                 };
 
-                createConfirmCancelDialog(listener);
+                createConfirmDiscardDialog(listener,
+                        R.string.confirm_dialog_discard_changes);
             } else {
                 // If the old note is not updated via field widgets,
                 // exit this fragment and do not save in database
@@ -286,84 +298,61 @@ public class NoteEditFragment extends Fragment {
     }
 
     /**
-     * Shows confirm save dialog on various states of this fragment. Accepts boolean flag to
-     * distinguish if the call came from pressing back button or from the save menu item button.
+     * Initiate discard note process via back press. Pressing no button in dialog, cancels the dialog.
+     * Pressing yes triggers various behaviours depending on the state of the note. The
+     * following are the behaviours outline for pressing back button:
      *
-     * @param isFromMenuItemPressed boolean flag to differentiate if the method call was made
-     *                              either from pressing back button or from the menu save item
+     * <ul>
+     *     <li>If it is a new note and it is not updated,
+     *      set result to discard the new note and return to home.</li>
+     *      <li>If it is a new note and it is updated with no title, it launches discard dialog.
+     *     Pressing yes sets result to discard the new note and return to home screen.</li>
+     *     <li>If it is a new note and it is updated with title, Set the result to save.</li>
+     *     <li>If it is an old note and note is not updated, return back to note view screen.</li>
+     *     <li>If it is an old note and note is updated with no title, it launches discard dialog.
+     *     Pressing yes sets result to  discard new changes and revert to its previous state.
+     *     Return to note view screen.</li>
+     *     <li>If it is an old note and note is updated with title, set result to save.</li>
+     * </ul>
+     *
      */
-    public void showConfirmSaveDialog(Context context) {
+    public void discardNoteFromBackButton() {
         if (mNewNote) {
-            if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()) {
-                if (mNote.getBody() == null || mNote.getBody().trim().isEmpty()) {
-                    sendResult(Activity.RESULT_CANCELED, true);
-                    getActivity().finish();
-                } else {
-                    DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which) {
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    dialog.cancel();
-
-                                    Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
-                                            Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, -50);
-                                    toast.show();
-                                    break;
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    sendResult(Activity.RESULT_CANCELED, true);
-                                    getActivity().finish();
-                                default:
-                                    dialog.cancel();
-                                    break;
+            if (mUpdated) {
+                if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()) {
+                        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case DialogInterface.BUTTON_POSITIVE:
+                                        sendResult(Activity.RESULT_CANCELED, true);
+                                        getActivity().finish();
+                                        break;
+                                    default:
+                                        dialog.cancel();
+                                        break;
+                                }
                             }
-                        }
-                    };
+                        };
 
-                    createConfirmSaveDialog(context, listener);
+                    createConfirmDiscardDialog(listener,
+                            R.string.confirm_dialog_discard_new_note);
+                } else {
+                    sendResult(Activity.RESULT_OK, false);
+                    getActivity().finish();
                 }
             } else {
-                DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case DialogInterface.BUTTON_POSITIVE:
-                                sendResult(Activity.RESULT_OK, false);
-                                getActivity().finish();
-                                break;
-                            case DialogInterface.BUTTON_NEGATIVE:
-                                sendResult(Activity.RESULT_CANCELED, true);
-                                getActivity().finish();
-                                break;
-                            default:
-                                dialog.cancel();
-                                break;
-                        }
-                    }
-                };
-
-                createConfirmSaveDialog(context, listener);
+                sendResult(Activity.RESULT_CANCELED, true);
+                getActivity().finish();
             }
         } else {
-            if (mNote.getTitle().trim().isEmpty()) {
-                if (mNote.getBody() == null || mNote.getBody().trim().isEmpty()) {
-                    sendResult(Activity.RESULT_CANCELED, false);
-                    getActivity().finish();
-                } else {
+            if (mUpdated) {
+                if (mNote.getTitle().trim().isEmpty()) {
                     DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             switch (which) {
                                 case DialogInterface.BUTTON_POSITIVE:
-                                    dialog.cancel();
-
-                                    Toast toast = Toast.makeText(getActivity(), R.string.toast_title_empty,
-                                            Toast.LENGTH_SHORT);
-                                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, -50);
-                                    toast.show();
-                                    break;
-                                case DialogInterface.BUTTON_NEGATIVE:
                                     sendResult(Activity.RESULT_CANCELED, false);
                                     getActivity().finish();
                                     break;
@@ -374,37 +363,19 @@ public class NoteEditFragment extends Fragment {
                         }
                     };
 
-                    createConfirmSaveDialog(context, listener);
+                    createConfirmDiscardDialog(listener,
+                            R.string.confirm_dialog_discard_changes);
+                } else {
+                    sendResult(Activity.RESULT_OK, false);
+                    getActivity().finish();
                 }
             } else {
-                if (mUpdated) {
-                    DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which) {
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    sendResult(Activity.RESULT_OK, false);
-                                    getActivity().finish();
-                                    break;
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    sendResult(Activity.RESULT_CANCELED, false);
-                                    getActivity().finish();
-                                    break;
-                                default:
-                                    dialog.cancel();
-                                    break;
-                            }
-                        }
-                    };
-
-                    createConfirmSaveDialog(context, listener);
-                } else {
-                    // If the old note is not updated via field widgets,
-                    // exit this fragment and do not save in database
-                    sendResult(Activity.RESULT_CANCELED, false);
-                    getActivity().finish();
-                }
+                // If the old note is not updated via field widgets,
+                // exit this fragment and do not save in database
+                sendResult(Activity.RESULT_CANCELED, false);
+                getActivity().finish();
             }
+
         }
     }
 
@@ -456,8 +427,8 @@ public class NoteEditFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_cancel_note:
-                showConfirmCancelDialog();
+            case R.id.menu_item_discard_note:
+                discardNoteFromMenuItem();
                 return true;
             case R.id.menu_item_save_note:
                 saveNoteFromMenuItem();

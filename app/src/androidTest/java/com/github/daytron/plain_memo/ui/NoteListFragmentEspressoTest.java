@@ -1,5 +1,6 @@
 package com.github.daytron.plain_memo.ui;
 
+import android.support.test.espresso.Espresso;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -95,6 +96,9 @@ public class NoteListFragmentEspressoTest {
 
         // Verify the NoteEditFragment is displayed via title EditText widget
         onView((withId(R.id.note_title_edit_text))).check(matches(isDisplayed()));
+
+        // Close soft keyboard if open
+        Espresso.closeSoftKeyboard();
 
         // Make sure to trigger auto delete new note for cleanup
         pressBack();

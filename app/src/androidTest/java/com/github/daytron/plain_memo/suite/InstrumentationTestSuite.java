@@ -1,7 +1,8 @@
 package com.github.daytron.plain_memo.suite;
 
-import com.github.daytron.plain_memo.ui.AddNewNoteEspressoTest;
+import com.github.daytron.plain_memo.ui.NewNoteEspressoTest;
 import com.github.daytron.plain_memo.ui.NoteListFragmentEspressoTest;
+import com.github.daytron.plain_memo.ui.OldNoteEspressoTest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -11,7 +12,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        AddNewNoteEspressoTest.class,
+        NewNoteEspressoTest.class,
+        OldNoteEspressoTest.class,
         NoteListFragmentEspressoTest.class})
 public class InstrumentationTestSuite {
 }

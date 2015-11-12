@@ -64,16 +64,14 @@ public class NoteEditActivity extends AppCompatActivity {
     }
 
     /**
-     * Take care of popping the fragment back stack or finishing the activity
-     * as appropriate.
+     * Takes care of handling unsaved note in the editor view.
      */
     @Override
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
         if (fragment instanceof NoteEditFragment) {
-            ((NoteEditFragment) fragment).showConfirmSaveDialog(
-                    getSupportActionBar().getThemedContext());
+            ((NoteEditFragment) fragment).discardNoteFromBackButton();
         } else {
             super.onBackPressed();
         }

@@ -385,9 +385,6 @@ public class NoteViewFragment extends Fragment {
                         getActivity().finish();
                     }
                 }
-
-                Toast.makeText(getActivity(), R.string.toast_note_cancel_save_operation,
-                        Toast.LENGTH_SHORT).show();
             }
         } else if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_NOTE_EDIT) {
