@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Plain Memo</string>
     <string name="app_developer">Ryan Gilera</string>
     <string name="app_support_email">gilera.ryan@gmail.com</string>
     <string name="app_release_year">2015</string>
@@ -20,6 +19,7 @@
     <string name="delete_note">Delete</string>
     <string name="search_note">Search</string>
     <string name="cancel_note">Cancel</string>
+    <string name="discard_note">Discard</string>
     <string name="share_note">Share</string>
 
     <plurals name="subtitle_plural">
@@ -48,13 +48,10 @@
     <string name="share_no_app_found">No app available</string>
 
     <!-- Confirmation dialog -->
-    <string name="confirm_dialog_save_title">Confirm Save</string>
     <string name="confirm_dialog_delete_title">Confirm Deletion</string>
-    <string name="confirm_dialog_save_body">Save the note?</string>
     <string name="confirm_dialog_delete_body">Delete the note </string>
-    <string name="confirm_dialog_cancel_title">Confirm Cancellation</string>
-    <string name="confirm_dialog_cancel_body">Cancel operation?</string>
-    <string name="dialog_button_save">Save</string>
+    <string name="confirm_dialog_discard_new_note">Discard new note?</string>
+    <string name="confirm_dialog_discard_changes">Discard changes?</string>
     <string name="dialog_button_delete">Delete</string>
     <string name="dialog_button_yes">Yes</string>
     <string name="dialog_button_no">No</string>
@@ -62,7 +59,6 @@
     <!-- Toast -->
     <string name="toast_note_save">The note has been saved</string>
     <string name="toast_note_deletion">The note has been deleted</string>
-    <string name="toast_note_cancel_save_operation">The operation has been cancelled</string>
     <string name="toast_title_empty">Please enter a title</string>
 
     <!-- Settings Preferences -->
