@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/list_item_linearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/note_list_item_padding_bottom"
+        android:paddingLeft="@dimen/note_list_item_margin_left_right"
+        android:paddingRight="@dimen/note_list_item_margin_left_right"
+        android:paddingTop="@dimen/note_list_item_padding_top">
+
+        <TextView
+            android:id="@+id/list_item_note_title_text_view"
+            fontPath="fonts/OpenSans-Semibold.ttf"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.5"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:paddingTop="5dp"
+            android:textColor="@color/colorFontSemibold"
+            tools:ignore="MissingPrefix"
+            tools:text="Crime Title"/>
+
+        <TextView
+            android:id="@+id/list_item_note_date_text_view"
+            fontPath="fonts/OpenSans-Light.ttf"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/colorFontNormal"
+            tools:ignore="MissingPrefix"
+            tools:text="11:05 am"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorNoteItemSeparator" />
+
+</LinearLayout>

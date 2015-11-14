@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fab_margin">30dp</dimen>
+
+    <dimen name="note_list_item_padding_top">20dp</dimen>
+    <dimen name="note_list_item_padding_bottom">20dp</dimen>
+
+    <dimen name="note_view_body_padding_top">20dp</dimen>
+    <dimen name="note_view_padding_left_right">20dp</dimen>
+</resources>

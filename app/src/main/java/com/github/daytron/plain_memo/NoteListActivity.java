@@ -1,52 +1,148 @@
 package com.github.daytron.plain_memo;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.view.Menu;
-import android.view.MenuItem;
 
-public class NoteListActivity extends AppCompatActivity {
+import com.github.daytron.plain_memo.database.NoteBook;
+import com.github.daytron.plain_memo.model.Note;
+import com.github.daytron.plain_memo.view.NotePagerActivity;
+import com.github.daytron.plain_memo.view.SingleFragmentActivity;
+import com.github.daytron.plain_memo.view.fragment.NoteListFragment;
+import com.github.daytron.plain_memo.view.fragment.NoteViewFragment;
+
+import java.util.UUID;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
+/**
+ * Main activity of the application. Host {@link NoteListFragment} for single pane
+ * configuration. For two-pane configuration, this activity host both {@link NoteListFragment}
+ * and {@link NoteViewFragment}. Implements Callbacks interfaces for both fragments.
+ */
+public class NoteListActivity extends SingleFragmentActivity
+        implements NoteListFragment.Callbacks, NoteViewFragment.Callbacks {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_note_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        // Load default settings values
+        PreferenceManager.setDefaultValues(this, R.xml.settings_general, false);
     }
 
+    @Override
+    protected Fragment createFragment() {
+        return new NoteListFragment();
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
+    public int getLayoutResId() {
+        return R.layout.activity_masterdetail;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onNoteSelected(Note note, boolean isNewNote) {
+        if (findViewById(R.id.detail_fragment_container) == null) {
+            Intent intent = NotePagerActivity.newIntent(this, note.getID(), isNewNote);
+            startActivity(intent);
+        } else {
+            Fragment newNoteDetail = NoteViewFragment.newInstance(note.getID(), isNewNote);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.detail_fragment_container, newNoteDetail)
+                    .commit();
+
+            // Auto scroll to last item when creating a new note. A new note is placed
+            // at the bottom by the Adapter.
+            if (isNewNote) {
+                NoteListFragment listFragment = (NoteListFragment)
+                        getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+                listFragment.updateUI();
+                listFragment.scrollToLastItem();
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onNoteDelete() {
+        // Update list
+        NoteListFragment listFragment = (NoteListFragment)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        listFragment.updateUI();
+
+        // Remove the deleted note's fragment
+        NoteViewFragment fragment = (NoteViewFragment)
+                getSupportFragmentManager().findFragmentById(R.id.detail_fragment_container);
+        getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+
+        // Set first note in the list as the new detail pane note
+        UUID noteId = listFragment.getFirstNoteFromList();
+        if (noteId != null) {
+            Fragment replacedNote = NoteViewFragment.newInstance(noteId, false);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.detail_fragment_container, replacedNote)
+                    .commit();
+            // Then auto scroll to first position
+            listFragment.scrollToFirstItem();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void tryToCancelSearchQueryOnNewActions() {
+        NoteListFragment listFragment = (NoteListFragment)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        listFragment.clearSearchForTwoPane();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Note getCurrentNoteDisplayedInDetailFragment() {
+        NoteViewFragment viewFragment = (NoteViewFragment)
+                getSupportFragmentManager().findFragmentById(R.id.detail_fragment_container);
+        return (viewFragment == null) ? null : viewFragment.getCurrentNoteDisplayedForTwoPane();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Initialize the contents of the Activity's standard options menu for the
+     * tablet interface instead of individual menu creation for its fragments.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_note_list, menu);
-        return true;
+        if (NoteBook.get(this).isTwoPane()) {
+            getMenuInflater().inflate(R.menu.menu_two_pane, menu);
+            return true;
+        } else {
+            return super.onCreateOptionsMenu(menu);
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void keepSearchViewExpandedIfPreviouslyExpanded() {
+        NoteListFragment listFragment = (NoteListFragment)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        listFragment.reQuerySearchViewUponClickingFilteredNote();
     }
 }

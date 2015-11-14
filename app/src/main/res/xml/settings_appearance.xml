@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/pref_appearance_show_num_notes_key"
+        android:summary="@string/pref_appearance_show_num_notes_summary"
+        android:title="@string/pref_appearance_show_num_notes_title"/>
+
+    <ListPreference
+        android:defaultValue="18"
+        android:dialogTitle="@string/pref_appearance_font_size_dialog_title"
+        android:entries="@array/fontSizeListArray"
+        android:entryValues="@array/fontSizeListValues"
+        android:key="@string/pref_appearance_font_size_key"
+        android:summary="%s"
+        android:title="@string/pref_appearance_font_size_title"/>
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/pref_appearance_single_tap_edit_key"
+        android:summary="@string/pref_appearance_single_tap_edit_summary"
+        android:title="@string/pref_appearance_single_tap_edit_title"/>
+
+</PreferenceScreen>

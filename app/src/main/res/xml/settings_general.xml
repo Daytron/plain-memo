@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:key="@string/pref_general_send_feedback_key"
+        android:summary="@string/pref_general_send_feedback_summary"
+        android:title="@string/pref_general_send_feedback_title"/>
+    <Preference
+        android:key="@string/pref_general_changelog_key"
+        android:summary="@string/pref_general_changelog_summary"
+        android:title="@string/pref_general_changelog_title"/>
+    <Preference
+        android:key="@string/pref_general_about_key"
+        android:title="@string/pref_general_about_title"/>
+
+</PreferenceScreen>

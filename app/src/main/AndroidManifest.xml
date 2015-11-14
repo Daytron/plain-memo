@@ -3,21 +3,33 @@
     package="com.github.daytron.plain_memo" >
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:name=".GlobalState">
         <activity
             android:name=".NoteListActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
+        <activity
+            android:name=".view.NotePagerActivity"
+            android:parentActivityName=".NoteListActivity" />
+        <activity android:name=".view.NoteEditActivity" />
+        <activity android:name=".settings.UserPreferenceActivity"
+            android:parentActivityName=".NoteListActivity"/>
     </application>
 
 </manifest>
