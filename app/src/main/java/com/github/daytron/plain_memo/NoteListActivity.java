@@ -18,6 +18,11 @@ import java.util.UUID;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
+/**
+ * Main activity of the application. Host {@link NoteListFragment} for single pane
+ * configuration. For two-pane configuration, this activity host both {@link NoteListFragment}
+ * and {@link NoteViewFragment}. Implements Callbacks interfaces for both fragments.
+ */
 public class NoteListActivity extends SingleFragmentActivity
         implements NoteListFragment.Callbacks, NoteViewFragment.Callbacks {
 
@@ -43,6 +48,9 @@ public class NoteListActivity extends SingleFragmentActivity
         return R.layout.activity_masterdetail;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onNoteSelected(Note note, boolean isNewNote) {
         if (findViewById(R.id.detail_fragment_container) == null) {
@@ -65,6 +73,9 @@ public class NoteListActivity extends SingleFragmentActivity
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onNoteDelete() {
         // Update list
@@ -89,6 +100,9 @@ public class NoteListActivity extends SingleFragmentActivity
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void tryToCancelSearchQueryOnNewActions() {
         NoteListFragment listFragment = (NoteListFragment)
@@ -96,6 +110,9 @@ public class NoteListActivity extends SingleFragmentActivity
         listFragment.clearSearchForTwoPane();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Note getCurrentNoteDisplayedInDetailFragment() {
         NoteViewFragment viewFragment = (NoteViewFragment)
@@ -104,30 +121,10 @@ public class NoteListActivity extends SingleFragmentActivity
     }
 
     /**
-     * Initialize the contents of the Activity's standard options menu.  You
-     * should place your menu items in to <var>menu</var>.
+     * {@inheritDoc}
      * <p/>
-     * <p>This is only called once, the first time the options menu is
-     * displayed.  To update the menu every time it is displayed, see
-     * {@link #onPrepareOptionsMenu}.
-     * <p/>
-     * <p>The default implementation populates the menu with standard system
-     * menu items.  These are placed in the {@link Menu#CATEGORY_SYSTEM} group so that
-     * they will be correctly ordered with application-defined menu items.
-     * Deriving classes should always call through to the base implementation.
-     * <p/>
-     * <p>You can safely hold on to <var>menu</var> (and any items created
-     * from it), making modifications to it as desired, until the next
-     * time onCreateOptionsMenu() is called.
-     * <p/>
-     * <p>When you add items to the menu, you can implement the Activity's
-     * {@link #onOptionsItemSelected} method to handle them there.
-     *
-     * @param menu The options menu in which you place your items.
-     * @return You must return true for the menu to be displayed;
-     * if you return false it will not be shown.
-     * @see #onPrepareOptionsMenu
-     * @see #onOptionsItemSelected
+     * Initialize the contents of the Activity's standard options menu for the
+     * tablet interface instead of individual menu creation for its fragments.
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -139,6 +136,9 @@ public class NoteListActivity extends SingleFragmentActivity
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void keepSearchViewExpandedIfPreviouslyExpanded() {
         NoteListFragment listFragment = (NoteListFragment)

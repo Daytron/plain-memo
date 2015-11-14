@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Created by ryan on 27/10/15.
+ * Subclass of DatabaseManager for creating and upgrading notes database.
  */
 public class NotesDatabaseManager extends DatabaseManager {
 
@@ -24,7 +24,7 @@ public class NotesDatabaseManager extends DatabaseManager {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    protected void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + NoteTable.NAME + "(" +
                 " _id integer primary key autoincrement, " +
                 NoteTable.Cols.UUID + ", " +
@@ -36,6 +36,11 @@ public class NotesDatabaseManager extends DatabaseManager {
         db.insert(NoteTable.NAME, null, createNewWelcomeNote());
     }
 
+    /**
+     * Prepare to add a note on first install to welcome user.
+     *
+     * @return ContentValues object
+     */
     private ContentValues createNewWelcomeNote() {
         ContentValues values = new ContentValues();
 

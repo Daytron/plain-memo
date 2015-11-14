@@ -1,7 +1,7 @@
 package com.github.daytron.plain_memo.data;
 
 /**
- * Created by ryan on 02/11/15.
+ * Class for providing global data at runtime where Android xml resources are not applicable.
  */
 public class GlobalValues {
 

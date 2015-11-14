@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.daytron.plain_memo.NoteListActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
@@ -40,7 +41,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by ryan on 27/10/15.
+ * Fragment class for viewing individual note.
  */
 public class NoteViewFragment extends Fragment {
 
@@ -60,9 +61,30 @@ public class NoteViewFragment extends Fragment {
 
     private Callbacks mCallbacks;
 
+    /**
+     * Required interface to bridge communication between {@link NoteViewFragment} and
+     * {@link NoteListFragment} objects through {@link com.github.daytron.plain_memo.NoteListActivity}.
+     * Necessary for Tablet screen interface.
+     */
     public interface Callbacks {
+        /**
+         * Notify {@link NoteListFragment} to update its list upon note deletion and replace
+         * the deleted note fragment with the top most Note item in the list.
+         */
         void onNoteDelete();
+
+        /**
+         * Keeps {@link android.support.v7.widget.SearchView} expanded with its query result when
+         * toolbar is refreshed to keep consistent with its state behavior. A workaround fix when
+         * the toolbar is refreshed upon replacing the {@link NoteViewFragment}, resetting the
+         * state of the {@link android.support.v7.widget.SearchView}.
+         */
         void keepSearchViewExpandedIfPreviouslyExpanded();
+
+        /**
+         * Notify {@link NoteListFragment} to try close {@link android.support.v7.widget.SearchView}
+         * widget it is currently active and open.
+         */
         void tryToCancelSearchQueryOnNewActions();
     }
 
@@ -76,7 +98,7 @@ public class NoteViewFragment extends Fragment {
         return fragment;
     }
 
-    private View.OnLongClickListener mHoldPressedListener = new View.OnLongClickListener() {
+    private final View.OnLongClickListener mHoldPressedListener = new View.OnLongClickListener() {
 
         @Override
         public boolean onLongClick(View pView) {
@@ -86,7 +108,7 @@ public class NoteViewFragment extends Fragment {
         }
     };
 
-    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+    private final View.OnTouchListener mTouchListener = new View.OnTouchListener() {
 
         @Override
         public boolean onTouch(View view, MotionEvent event) {
@@ -113,18 +135,10 @@ public class NoteViewFragment extends Fragment {
     };
 
     /**
-     * Called to do initial creation of a fragment.  This is called after
-     * {@link #onAttach(Activity)} and before
-     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * {@inheritDoc}
      * <p/>
-     * <p>Note that this can be called while the fragment's activity is
-     * still in the process of being created.  As such, you can not rely
-     * on things like the activity's content view hierarchy being initialized
-     * at this point.  If you want to do work once the activity itself is
-     * created, see {@link #onActivityCreated(Bundle)}.
-     *
-     * @param savedInstanceState If the fragment is being re-created from
-     *                           a previous saved state, this is the state.
+     * Retrieve details of the {@link Note} that was clicked from {@link NoteListFragment} that
+     * is about to be displayed.
      */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -153,22 +167,11 @@ public class NoteViewFragment extends Fragment {
     }
 
     /**
-     * Called to have the fragment instantiate its user interface view.
-     * This is optional, and non-graphical fragments can return null (which
-     * is the default implementation).  This will be called between
-     * {@link #onCreate(Bundle)} and {@link #onActivityCreated(Bundle)}.
+     * {@inheritDoc}
      * <p/>
-     * <p>If you return a View from here, you will later be called in
-     * {@link #onDestroyView} when the view is being released.
-     *
-     * @param inflater           The LayoutInflater object that can be used to inflate
-     *                           any views in the fragment,
-     * @param container          If non-null, this is the parent view that the fragment's
-     *                           UI should be attached to.  The fragment should not add the view itself,
-     *                           but this can be used to generate the LayoutParams of the view.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     *                           from a previous saved state as given here.
-     * @return Return the View for the fragment's UI, or null.
+     * Inflate the necessary UI widgets for this fragment and apply user preference from the
+     * settings. Apply necessary listener behaviors when user tap the title, date or the note itself
+     * for the single touch edit feature.
      */
     @Nullable
     @Override
@@ -233,15 +236,21 @@ public class NoteViewFragment extends Fragment {
         return v;
     }
 
+    /**
+     * Retrieve current note displayed.
+     *
+     * @return {@link Note} currently displayed in two-pane configuration.
+     * @see NoteListFragment.Callbacks#getCurrentNoteDisplayedInDetailFragment()
+     * @see NoteListActivity#getCurrentNoteDisplayedInDetailFragment()
+     */
     public Note getCurrentNoteDisplayedForTwoPane() {
         return mNote;
     }
 
     /**
-     * Called when a fragment is first attached to its context.
-     * {@link #onCreate(Bundle)} will be called after this.
-     *
-     * @param context
+     * {@inheritDoc}
+     * <p/>
+     * Initialise Callbacks instance member upon attaching this fragment.
      */
     @Override
     public void onAttach(Context context) {
@@ -253,8 +262,9 @@ public class NoteViewFragment extends Fragment {
     }
 
     /**
-     * Called when the fragment is no longer attached to its activity.  This
-     * is called after {@link #onDestroy()}.
+     * {@inheritDoc}
+     * <p/>
+     * Nullify the Callbacks instance member when this fragment is about to detach.
      */
     @Override
     public void onDetach() {
@@ -263,10 +273,9 @@ public class NoteViewFragment extends Fragment {
     }
 
     /**
-     * Called when the fragment is visible to the user and actively running.
-     * This is generally
-     * tied to {@link Activity#onResume() Activity.onResume} of the containing
-     * Activity's lifecycle.
+     * {@inheritDoc}
+     * <p/>
+     * Load {@link NoteEditFragment} into the view when the {@link Note} in question is newly created.
      */
     @Override
     public void onResume() {
@@ -283,6 +292,11 @@ public class NoteViewFragment extends Fragment {
         }
     }
 
+    /**
+     * Formats the date displayed in the note view. Displays updated date if the note is updated.
+     * Otherwise, created date is displayed instead. The format of the date displayed changes
+     * depending on the current date this note is viewed.
+     */
     private void updateDate() {
         StringBuilder dateTimeFormatted;
 
@@ -322,6 +336,12 @@ public class NoteViewFragment extends Fragment {
         mDateTextView.setText(dateTimeFormatted.toString());
     }
 
+    /**
+     * Helper method to build the formatted date and time. It determines which date to format.
+     *
+     * @param dateFormat The formatted {@link String} date only.
+     * @return {@link StringBuilder} object, represents the formatted complete date and time.
+     */
     private StringBuilder buildFullDateString(String dateFormat) {
         String weekday = DateUtils.formatDateTime(getActivity(),
                 mNote.getDateEdited().getTime(),
@@ -348,6 +368,13 @@ public class NoteViewFragment extends Fragment {
         return builder;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Called to ask the fragment to save its current dynamic state, so it
+     * can later be reconstructed in a new instance of its process is
+     * restarted.
+     */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -355,17 +382,9 @@ public class NoteViewFragment extends Fragment {
     }
 
     /**
-     * Receive the result from a previous call to
-     * {@link #startActivityForResult(Intent, int)}.  This follows the
-     * related Activity API as described there in
-     * {@link Activity#onActivityResult(int, int, Intent)}.
-     *
-     * @param requestCode The integer request code originally supplied to
-     *                    startActivityForResult(), allowing you to identify who this
-     *                    result came from.
-     * @param resultCode  The integer result code returned by the child activity
-     *                    through its setResult().
-     * @param data        An Intent, which can return result data to the caller
+     * {@inheritDoc}
+     * <p/>
+     * Handles result returned back from {@link NoteViewFragment} for note saving and deletion.
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -418,17 +437,11 @@ public class NoteViewFragment extends Fragment {
     }
 
     /**
-     * Initialize the contents of the Activity's standard options menu.  You
-     * should place your menu items in to <var>menu</var>.  For this method
-     * to be called, you must have first called {@link #setHasOptionsMenu}.  See
-     * {@link Activity#onCreateOptionsMenu(Menu) Activity.onCreateOptionsMenu}
-     * for more information.
-     *
-     * @param menu     The options menu in which you place your items.
-     * @param inflater
-     * @see #setHasOptionsMenu
-     * @see #onPrepareOptionsMenu
-     * @see #onOptionsItemSelected
+     * {@inheritDoc}
+     * <p/>
+     * For two-pane configuration, when the toolbar is refreshed, this method is called.
+     * Notify {@link NoteListFragment} that the toolbar is refreshed and re-query search if
+     * currently active. Otherwise for single pane view, inflate the menu view for single-pane.
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -477,12 +490,18 @@ public class NoteViewFragment extends Fragment {
         }
     }
 
+    /**
+     * Cancel and close search activity for two-pane view via {@link Callbacks}.
+     */
     private void cancelSearchQueryFromTwoPane() {
         if (NoteBook.get(getActivity()).isTwoPane()) {
             mCallbacks.tryToCancelSearchQueryOnNewActions();
         }
     }
 
+    /**
+     * Intent behavior for sharing notes.
+     */
     private void shareNote() {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
@@ -496,7 +515,7 @@ public class NoteViewFragment extends Fragment {
 
         PackageManager packageManager = getActivity().getPackageManager();
         // Look for available applications that has ACTION_SEND intent
-        List<ResolveInfo> listOfAppResolveInfo = packageManager.queryIntentActivities(intent,0);
+        List<ResolveInfo> listOfAppResolveInfo = packageManager.queryIntentActivities(intent, 0);
 
         String packageNameOfAppToHide = "com.github.daytron.plain_memo";
         ArrayList<Intent> targetShareIntents = new ArrayList<>();
@@ -510,7 +529,7 @@ public class NoteViewFragment extends Fragment {
                 if (!packageNameOfAppToHide.equalsIgnoreCase(packageName)) {
                     Intent targetIntent = new Intent(Intent.ACTION_SEND);
                     targetIntent.setPackage(packageName);
-                    targetIntent.setClassName(packageName,className);
+                    targetIntent.setClassName(packageName, className);
                     targetIntent.setType("text/plain");
                     targetIntent.putExtra(Intent.EXTRA_TEXT, textData.toString());
                     targetShareIntents.add(targetIntent);
@@ -518,14 +537,14 @@ public class NoteViewFragment extends Fragment {
             }
         }
 
-        if(targetShareIntents.size() > 0) {
+        if (targetShareIntents.size() > 0) {
             Intent chooserIntent = Intent.createChooser(targetShareIntents.remove(
                             targetShareIntents.size() - 1),
                     getResources().getText(R.string.share_to));
 
             // Populate chooser with new filtered intents
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
-                    targetShareIntents.toArray(new Parcelable[] {}));
+                    targetShareIntents.toArray(new Parcelable[]{}));
             startActivity(chooserIntent);
         } else {
             Toast.makeText(getActivity(),

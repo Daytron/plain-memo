@@ -8,7 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Created by ryan on 28/10/15.
+ * Utility class for handling dates.
  */
 public class DateUtil {
 

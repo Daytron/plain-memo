@@ -16,7 +16,7 @@ import java.util.UUID;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
- * Created by ryan on 28/10/15.
+ * Host Activity class for {@link NoteEditFragment}
  */
 public class NoteEditActivity extends AppCompatActivity {
 
@@ -27,6 +27,11 @@ public class NoteEditActivity extends AppCompatActivity {
     private static final String EXTRA_NOTE_TOUCH_OFFSET =
             "com.github.daytron.plain_memo.note_touch_offset";
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Load the {@link NoteEditFragment} into the view.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +59,15 @@ public class NoteEditActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Static helper method for building the Intent to start this activity.
+     *
+     * @param packageContext The application context
+     * @param noteId         id of the note as UUID object
+     * @param isNewNote      boolean flag if the note is newly created (true) or not (false)
+     * @param offset         Optional touch position offset use to place the edit cursor in the EditText
+     * @return Intent built
+     */
     public static Intent newIntent(Context packageContext, UUID noteId, boolean isNewNote,
                                    long offset) {
         Intent intent = new Intent(packageContext, NoteEditActivity.class);
@@ -77,6 +91,11 @@ public class NoteEditActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Attach Calligraphy for this activity.
+     */
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));

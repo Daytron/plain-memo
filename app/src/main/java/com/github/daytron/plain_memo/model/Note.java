@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Created by ryan on 27/10/15.
+ * Model class for note.
  */
 public class Note {
 

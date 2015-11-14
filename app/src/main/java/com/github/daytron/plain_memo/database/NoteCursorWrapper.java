@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Created by ryan on 27/10/15.
+ * Custom cursor wrapper class for {@link Note}.
  */
 class NoteCursorWrapper extends CursorWrapper {
 

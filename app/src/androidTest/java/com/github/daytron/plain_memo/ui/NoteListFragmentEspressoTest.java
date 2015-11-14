@@ -35,7 +35,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 @LargeTest
 public class NoteListFragmentEspressoTest {
 
-    private final String[] NEW_NOTE_TiTLES = {
+    private final String[] NEW_NOTE_TITLES = {
             "My Shopping List", "My Class Schedule", "Sold items on Ebay"};
 
     @Rule
@@ -62,7 +62,7 @@ public class NoteListFragmentEspressoTest {
      *****************/
 
     private void fillNewNotesForSearch() {
-        for (String title : NEW_NOTE_TiTLES) {
+        for (String title : NEW_NOTE_TITLES) {
             EspressoHelpers.clickFabNewNoteButtonAndVerifyAction();
 
             // Find EditText title and start typing text into it
@@ -77,7 +77,7 @@ public class NoteListFragmentEspressoTest {
     }
 
     private void deleteAllAddedNotes() {
-        for (String title : NEW_NOTE_TiTLES) {
+        for (String title : NEW_NOTE_TITLES) {
             EspressoHelpers.openANoteFromListAndVerify(title);
             EspressoHelpers.deleteNoteFromView(title);
             EspressoHelpers.verifyCurrentScreenIsHome();
@@ -124,12 +124,12 @@ public class NoteListFragmentEspressoTest {
         onView(withId(R.id.search_src_text)).perform(typeText(queryText));
 
         // Verify filtered items
-        onView(withText(NEW_NOTE_TiTLES[0])).check(matches(isDisplayed()));
-        onView(withText(NEW_NOTE_TiTLES[1])).check(matches(isDisplayed()));
+        onView(withText(NEW_NOTE_TITLES[0])).check(matches(isDisplayed()));
+        onView(withText(NEW_NOTE_TITLES[1])).check(matches(isDisplayed()));
 
         // Verify the third note is not displayed
         try {
-            onView(withText(NEW_NOTE_TiTLES[2])).check(matches(isCompletelyDisplayed()));
+            onView(withText(NEW_NOTE_TITLES[2])).check(matches(isCompletelyDisplayed()));
             throw new AssertionFailedError("Third note is still displayed");
         } catch (AssertionFailedError error) { /* Do nothing */ }
 

@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by ryan on 27/10/15.
+ * Abstract class to manage database handling. Allows multiple databases creation.
  */
 abstract class DatabaseManager {
 
@@ -144,8 +144,8 @@ abstract class DatabaseManager {
         return false;
     }
 
-    /** Increments the internal db counter by one and opens the db if needed
-     *
+    /**
+     * Open database connection.
      */
     public void open(){
         sqLiteOpenHelper.addConnection();

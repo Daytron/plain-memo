@@ -1,6 +1,5 @@
 package com.github.daytron.plain_memo.view.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,9 +24,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.daytron.plain_memo.NoteListActivity;
 import com.github.daytron.plain_memo.R;
 import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
@@ -41,17 +40,16 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by ryan on 27/10/15.
+ * Fragment class for displaying a list view of {@link Note} objects.
  */
 public class NoteListFragment extends Fragment implements SearchView.OnQueryTextListener,
         View.OnClickListener, SearchView.OnCloseListener {
 
     private final String ARG_QUERY_SEARCH_STRING = "query_search_string";
     private final String ARG_SEARCHVIEW_MENU_EXPANDED = "searchview_menu_expanded";
-    private final String ARG_SELECTED_NOTE_HIGHLIGHT = "selected_note_higlight";
+    private final String ARG_SELECTED_NOTE_HIGHLIGHT = "selected_note_highlight";
 
-    private LinearLayout mContentLinearLayout;
-    private TextView mEmptyTextView;
+    private TextView mEmptyListTextView;
     private RecyclerView mNoteRecyclerView;
     private NoteListAdapter mAdapter;
     private List<Note> mListOfNotes;
@@ -71,24 +69,31 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     private Callbacks mCallbacks;
 
     /**
-     * Required interface for hosting activities.
+     * Required interface for communication to the fragment manager and to the
+     * NoteViewFragment for handling small and large screen configurations.
      */
     public interface Callbacks {
+        /**
+         * Notify {@link android.support.v4.app.FragmentManager} to load the selected note
+         * into the view depending on the screen size configuration (Single pane ot Two-Pane setup).
+         *
+         * @param note      The {@link Note} to view
+         * @param isNewNote Boolean flag for handling newly created note
+         */
         void onNoteSelected(Note note, boolean isNewNote);
 
+        /**
+         * Extract the current note displayed in the Detail layout of Two-Pane setup.
+         *
+         * @return The {@link Note} extracted
+         */
         Note getCurrentNoteDisplayedInDetailFragment();
     }
 
     /**
-     * Called to do initial creation of a fragment.  This is called after
-     * {@link #onAttach(Activity)} and before
-     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * {@inheritDoc}
      * <p/>
-     * <p>Note that this can be called while the fragment's activity is
-     * still in the process of being created.  As such, you can not rely
-     * on things like the activity's content view hierarchy being initialized
-     * at this point.  If you want to do work once the activity itself is
-     * created, see {@link #onActivityCreated(Bundle)}.
+     * Activate options menu for this fragment.
      *
      * @param savedInstanceState If the fragment is being re-created from
      *                           a previous saved state, this is the state.
@@ -100,22 +105,10 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Called to have the fragment instantiate its user interface view.
-     * This is optional, and non-graphical fragments can return null (which
-     * is the default implementation).  This will be called between
-     * {@link #onCreate(Bundle)} and {@link #onActivityCreated(Bundle)}.
+     * {@inheritDoc}
      * <p/>
-     * <p>If you return a View from here, you will later be called in
-     * {@link #onDestroyView} when the view is being released.
-     *
-     * @param inflater           The LayoutInflater object that can be used to inflate
-     *                           any views in the fragment,
-     * @param container          If non-null, this is the parent view that the fragment's
-     *                           UI should be attached to.  The fragment should not add the view itself,
-     *                           but this can be used to generate the LayoutParams of the view.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     *                           from a previous saved state as given here.
-     * @return Return the View for the fragment's UI, or null.
+     * Inflate the necessary UI widgets for this fragment and apply user preference from the
+     * settings. Implement behavior for incoming {@link Intent} for {@link Intent#ACTION_SEND}.
      */
     @Nullable
     @Override
@@ -125,8 +118,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         // ContextCompat allows app to choose between pre SDK 23 and above for getColor method
         int bgColor = ContextCompat.getColor(getActivity(), R.color.colorBackgroundNoteListBody);
 
-        mContentLinearLayout = (LinearLayout) view.findViewById(R.id.note_linear_layout_bg);
-        mContentLinearLayout.setBackgroundColor(bgColor);
+        LinearLayout contentLinearLayout = (LinearLayout) view.findViewById(R.id.note_linear_layout_bg);
+        contentLinearLayout.setBackgroundColor(bgColor);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String selectedFontSize = sharedPref
@@ -136,8 +129,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         int valueSize = Integer.parseInt(selectedFontSize);
         float fontSize = (float) valueSize;
 
-        mEmptyTextView = (TextView) view.findViewById(R.id.note_empty_text_view);
-        mEmptyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
+        mEmptyListTextView = (TextView) view.findViewById(R.id.note_empty_text_view);
+        mEmptyListTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
 
         mNoteRecyclerView = (RecyclerView) view.findViewById(R.id.note_recycler_view);
         mNoteRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -177,18 +170,20 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         NoteBook.get(getActivity()).addNote(note);
 
         clearSearchForTwoPane();
-
         mCallbacks.onNoteSelected(note, true);
     }
 
+    /**
+     * Update the UI widgets and bind updated data to reflect user action.
+     */
     public void updateUI() {
         // Update list (for new changes)
         mListOfNotes = NoteBook.get(getActivity()).getNotes();
 
         if (mListOfNotes.isEmpty()) {
-            mEmptyTextView.setVisibility(View.VISIBLE);
+            mEmptyListTextView.setVisibility(View.VISIBLE);
         } else {
-            mEmptyTextView.setVisibility(View.GONE);
+            mEmptyListTextView.setVisibility(View.GONE);
         }
 
         if (mAdapter == null) {
@@ -218,10 +213,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Called when a fragment is first attached to its context.
-     * {@link #onCreate(Bundle)} will be called after this.
-     *
-     * @param context
+     * {@inheritDoc}
+     * <p/>
+     * Initialise Callbacks instance member upon attaching this fragment.
      */
     @Override
     public void onAttach(Context context) {
@@ -230,8 +224,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Called when the fragment is no longer attached to its activity.  This
-     * is called after {@link #onDestroy()}.
+     * {@inheritDoc}
+     * <p/>
+     * Nullify the Callbacks instance member when this fragment is about to detach.
      */
     @Override
     public void onDetach() {
@@ -240,23 +235,11 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
+     * {@inheritDoc}
+     * <p/>
      * Called to ask the fragment to save its current dynamic state, so it
      * can later be reconstructed in a new instance of its process is
-     * restarted.  If a new instance of the fragment later needs to be
-     * created, the data you place in the Bundle here will be available
-     * in the Bundle given to {@link #onCreate(Bundle)},
-     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}, and
-     * {@link #onActivityCreated(Bundle)}.
-     * <p/>
-     * <p>This corresponds to {@link Activity#onSaveInstanceState(Bundle)
-     * Activity.onSaveInstanceState(Bundle)} and most of the discussion there
-     * applies here as well.  Note however: <em>this method may be called
-     * at any time before {@link #onDestroy()}</em>.  There are many situations
-     * where a fragment may be mostly torn down (such as when placed on the
-     * back stack with no UI showing), but its state will not be saved until
-     * its owning activity actually needs to save its state.
-     *
-     * @param outState Bundle in which to place your saved state.
+     * restarted.
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -272,17 +255,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Called when the fragment's activity has been created and this
-     * fragment's view hierarchy instantiated.  It can be used to do final
-     * initialization once these pieces are in place, such as retrieving
-     * views or restoring state.  It is also useful for fragments that use
-     * {@link #setRetainInstance(boolean)} to retain their instance,
-     * as this callback tells the fragment when it is fully associated with
-     * the new activity instance.  This is called after {@link #onCreateView}
-     * and before {@link #onViewStateRestored(Bundle)}.
+     * {@inheritDoc}
+     * <p/>
+     * Re-establishes the save information from last configuration. Any active search will be
+     * re-queried to maintain action consistency.
      *
-     * @param savedInstanceState If the fragment is being re-created from
-     *                           a previous saved state, this is the state.
+     * @see #onSaveInstanceState(Bundle)
      */
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -301,10 +279,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Called when the fragment is visible to the user and actively running.
-     * This is generally
-     * tied to {@link Activity#onResume() Activity.onResume} of the containing
-     * Activity's lifecycle.
+     * {@inheritDoc}
+     * <p/>
+     * Apply user settings preference and update UI data upon resuming this fragment into view.
      */
     @Override
     public void onResume() {
@@ -318,9 +295,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Called when the Fragment is no longer resumed.  This is generally
-     * tied to {@link Activity#onPause() Activity.onPause} of the containing
-     * Activity's lifecycle.
+     * {@inheritDoc}
+     * <p/>
+     * Try to close the database.
      */
     @Override
     public void onPause() {
@@ -329,8 +306,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Called when the fragment is no longer in use.  This is called
-     * after {@link #onStop()} and before {@link #onDetach()}.
+     * {@inheritDoc}
+     * <p/>
+     * Close the database if {@link #onPause()} is not called.
      */
     @Override
     public void onDestroy() {
@@ -342,6 +320,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
     }
 
+    /**
+     * Inner class responsible for handling and binding data of a single {@link Note} list item UI.
+     */
     private class NoteHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
@@ -374,6 +355,11 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             mLinearLayout = (LinearLayout) itemView.findViewById(R.id.list_item_linearlayout);
         }
 
+        /**
+         * binds data into the item view.
+         *
+         * @param note The {@link Note} data to bind.
+         */
         public void bindCrime(Note note) {
             SharedPreferences sharedPref = PreferenceManager
                     .getDefaultSharedPreferences(getActivity());
@@ -429,7 +415,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
 
         /**
-         * Apply necessary background color to represent item selection and deselection.
+         * Apply necessary background color to represent item selection and deselection for
+         * Two-Pane configuration only.
          *
          * @param isSelected Boolean value if the particular ViewHolder is the selected note.
          */
@@ -446,7 +433,7 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
 
         /**
-         * Called when a view has been clicked.
+         * Called when an item view has been clicked.
          *
          * @param v The view that was clicked.
          */
@@ -467,10 +454,19 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
     }
 
+    /**
+     * Retrieves {@link UUID} of the first {@link Note} from the list.
+     *
+     * @return UUID object of the first note from the list.
+     */
     public UUID getFirstNoteFromList() {
         return ((mAdapter == null) ? null : mAdapter.getFirstItem());
     }
 
+    /**
+     * Inner class responsible for handling {@link android.support.v7.widget.RecyclerView.ViewHolder}
+     * objects in the {@link RecyclerView}.
+     */
     private class NoteListAdapter extends RecyclerView.Adapter<NoteHolder> {
 
         private List<Note> mNotes;
@@ -493,14 +489,6 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             }
         }
 
-        public Note getNoteByPos(int pos) {
-            try {
-                return mNotes.get(pos);
-            } catch (IndexOutOfBoundsException ex) {
-                return null;
-            }
-        }
-
         public int getPositionByNote(Note note) {
             for (int i = 0; i < mNotes.size(); i++) {
                 if (mNotes.get(i).getID().equals(note.getID())) {
@@ -510,39 +498,11 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
 
             return -1;
         }
-
+        
         /**
-         * Called by RecyclerView when it starts observing this Adapter.
+         * {@inheritDoc}
          * <p/>
-         * Keep in mind that same adapter may be observed by multiple RecyclerViews.
-         *
-         * @param recyclerView The RecyclerView instance which started observing this adapter.
-         * @see #onDetachedFromRecyclerView(RecyclerView)
-         */
-        @Override
-        public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-            super.onAttachedToRecyclerView(recyclerView);
-        }
-
-        /**
-         * Called when RecyclerView needs a new {@link android.support.v7.widget.RecyclerView.ViewHolder}
-         * of the given type to represent an item.
-         * <p/>
-         * This new ViewHolder should be constructed with a new View that can represent the items
-         * of the given type. You can either create a new View manually or inflate it from an XML
-         * layout file.
-         * <p/>
-         * The new ViewHolder will be used to display items of the adapter using
-         * {@link #onBindViewHolder(RecyclerView.ViewHolder, int, List)}. Since it will be re-used to display
-         * different items in the data set, it is a good idea to cache references to sub views of
-         * the View to avoid unnecessary {@link View#findViewById(int)} calls.
-         *
-         * @param parent   The ViewGroup into which the new View will be added after it is bound to
-         *                 an adapter position.
-         * @param viewType The view type of the new View.
-         * @return A new ViewHolder that holds a View of the given view type.
-         * @see #getItemViewType(int)
-         * @see #onBindViewHolder(NoteHolder, int)
+         * Inflates the view for the {@link android.support.v7.widget.RecyclerView.ViewHolder}.
          */
         @Override
         public NoteHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -553,25 +513,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
 
         /**
-         * Called by RecyclerView to display the data at the specified position. This method should
-         * update the contents of the {@link android.support.v7.widget.RecyclerView.ViewHolder#itemView}
-         * to reflect the item at the given position.
+         * {@inheritDoc}
          * <p/>
-         * Note that unlike {@link ListView}, RecyclerView will not call this method
-         * again if the position of the item changes in the data set unless the item itself is
-         * invalidated or the new position cannot be determined. For this reason, you should only
-         * use the <code>position</code> parameter while acquiring the related data item inside
-         * this method and should not keep a copy of it. If you need the position of an item later
-         * on (e.g. in a click listener), use
-         * {@link android.support.v7.widget.RecyclerView.ViewHolder#getAdapterPosition()} which will
-         * have the updated adapter position.
-         * <p/>
-         * Override {@link #onBindViewHolder(RecyclerView.ViewHolder, int, List)} instead if Adapter can
-         * handle effcient partial bind.
-         *
-         * @param holder   The ViewHolder which should be updated to represent the contents of the
-         *                 item at the given position in the data set.
-         * @param position The position of the item within the adapter's data set.
+         * Binds data for each {@link android.support.v7.widget.RecyclerView.ViewHolder}.
          */
         @Override
         public void onBindViewHolder(NoteHolder holder, int position) {
@@ -594,6 +538,11 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
             return mNotes.size();
         }
 
+        /**
+         * Sets a new set of Notes to the {@link RecyclerView}.
+         *
+         * @param notes List of notes as {@link List} object.
+         */
         public void setNotes(List<Note> notes) {
             mNotes = notes;
         }
@@ -703,17 +652,11 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Initialize the contents of the Activity's standard options menu.  You
-     * should place your menu items in to <var>menu</var>.  For this method
-     * to be called, you must have first called {@link #setHasOptionsMenu}.  See
-     * {@link Activity#onCreateOptionsMenu(Menu) Activity.onCreateOptionsMenu}
-     * for more information.
+     * {@inheritDoc}
      *
-     * @param menu     The options menu in which you place your items.
-     * @param inflater
-     * @see #setHasOptionsMenu
-     * @see #onPrepareOptionsMenu
-     * @see #onOptionsItemSelected
+     * Attaches the {@link SearchView} into the {@link android.support.v7.widget.Toolbar}. Re-apply
+     * filter state from its last active state from the last configuration.
+     *
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -749,6 +692,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
     }
 
+    /**
+     * Re-establish search state when user click a list item in the Two-Pane configuration.
+     *
+     * @see NoteViewFragment.Callbacks#keepSearchViewExpandedIfPreviouslyExpanded()
+     * @see NoteListActivity#keepSearchViewExpandedIfPreviouslyExpanded()
+     */
     public void reQuerySearchViewUponClickingFilteredNote() {
         if (mSearchView.isIconified() && mTwoPaneClickingNoteToExpandSearch) {
             mTwoPaneKeepSearchbarExpandedTriggered = true;
@@ -794,6 +743,9 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     /**
      * Called when the query text is changed by the user.
      *
+     * For single pane view, the filter applies normally. But for two-pane view, it also handles
+     * item highlight selection.
+     *
      * @param newText the new content of the query text field.
      * @return false if the SearchView should perform the default action of showing any
      * suggestions if available, true if the action was handled by the listener.
@@ -829,6 +781,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         if (NoteBook.get(getActivity()).isTwoPane() &&
                 !mTwoPaneKeepSearchbarExpandedTriggered &&
                 !mTwoPaneJustRotatedScreen) {
+            // Handles item highlight when search query is empty.
+            // Select and highlight the first item after refreshing the list
             if (newText.trim().isEmpty()) {
                 int pos = getPositionOfDetailedFragment();
                 if (pos > -1) {
@@ -854,6 +808,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         return -1;
     }
 
+    /**
+     * For two-pane configuration, scrolls to the first item and select it.
+     *
+     * @see NoteViewFragment.Callbacks#onNoteDelete()
+     * @see NoteListActivity#onNoteDelete()
+     */
     public void scrollToFirstItem() {
         if (mAdapter.getItemCount() > 0) {
             mNoteRecyclerView.scrollToPosition(0);
@@ -866,6 +826,12 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
         }
     }
 
+    /**
+     * For two-pane configuration, scrolls to the last item and select it.
+     *
+     * @see com.github.daytron.plain_memo.view.fragment.NoteListFragment.Callbacks#onNoteSelected(Note, boolean)
+     * @see NoteListActivity#onNoteSelected(Note, boolean)
+     */
     public void scrollToLastItem() {
         int totalItems = mAdapter.getItemCount();
         if (totalItems > 0) {
@@ -905,7 +871,8 @@ public class NoteListFragment extends Fragment implements SearchView.OnQueryText
     }
 
     /**
-     * Use to cancel search query for new actions such as add new note, delete, edit and etc.
+     * Use to cancel search query for new actions such as add new note, delete, edit and etc
+     * (for two-pane configuration only).
      */
     public void clearSearchForTwoPane() {
         if (NoteBook.get(getActivity()).isTwoPane()) {

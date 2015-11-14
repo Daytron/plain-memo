@@ -1,7 +1,7 @@
 package com.github.daytron.plain_memo.database;
 
 /**
- * Created by ryan on 27/10/15.
+ * Class holding database meta information.
  */
 class NoteDbSchema {
 

@@ -19,7 +19,7 @@ Features
 Download Beta
 -------------
 
-The app is now available beta testing on Google Play:
+The app is now available for beta testing on Google Play:
 
 [![Google Play link](https://raw.githubusercontent.com/Daytron/plain-memo/develop/Images/google-play-badge.png?token=AGk1Wj--crPga9u3OkOf2W8UnpKAinSDks5WUHbVwA%3D%3D)](https://play.google.com/apps/testing/com.github.daytron.plain_memo.beta)
 

@@ -20,7 +20,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 /**
  * Espresso test for UI events in the NoteListFragment
  */
-public class EspressoHelpers {
+class EspressoHelpers {
 
     private EspressoHelpers(){}
 

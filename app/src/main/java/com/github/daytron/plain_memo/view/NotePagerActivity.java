@@ -21,7 +21,7 @@ import java.util.UUID;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
- * Created by ryan on 27/10/15.
+ * Activity for hosting {@link NoteViewFragment} via {@link FragmentStatePagerAdapter}.
  */
 public class NotePagerActivity extends AppCompatActivity {
 
@@ -42,9 +42,9 @@ public class NotePagerActivity extends AppCompatActivity {
     }
 
     /**
+     * {@inheritDoc}
+     * <p/>
      * Perform initialization of all fragments and loaders.
-     *
-     * @param savedInstanceState
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +88,11 @@ public class NotePagerActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Attach Calligraphy for this activity.
+     */
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));

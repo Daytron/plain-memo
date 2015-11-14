@@ -1,7 +1,6 @@
 package com.github.daytron.plain_memo.view.fragment;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,7 +32,7 @@ import com.github.daytron.plain_memo.model.Note;
 import java.util.UUID;
 
 /**
- * Created by ryan on 27/10/15.
+ * Fragment class for editing note.
  */
 public class NoteEditFragment extends Fragment {
 
@@ -68,18 +67,10 @@ public class NoteEditFragment extends Fragment {
     }
 
     /**
-     * Called to do initial creation of a fragment.  This is called after
-     * {@link #onAttach(Activity)} and before
-     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * {@inheritDoc}
      * <p/>
-     * <p>Note that this can be called while the fragment's activity is
-     * still in the process of being created.  As such, you can not rely
-     * on things like the activity's content view hierarchy being initialized
-     * at this point.  If you want to do work once the activity itself is
-     * created, see {@link #onActivityCreated(Bundle)}.
-     *
-     * @param savedInstanceState If the fragment is being re-created from
-     *                           a previous saved state, this is the state.
+     * Retrieve details of the {@link Note} that was viewed from {@link NoteViewFragment} that
+     * is about to be edited.
      */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,22 +86,10 @@ public class NoteEditFragment extends Fragment {
     }
 
     /**
-     * Called to have the fragment instantiate its user interface view.
-     * This is optional, and non-graphical fragments can return null (which
-     * is the default implementation).  This will be called between
-     * {@link #onCreate(Bundle)} and {@link #onActivityCreated(Bundle)}.
+     * {@inheritDoc}
      * <p/>
-     * <p>If you return a View from here, you will later be called in
-     * {@link #onDestroyView} when the view is being released.
-     *
-     * @param inflater           The LayoutInflater object that can be used to inflate
-     *                           any views in the fragment,
-     * @param container          If non-null, this is the parent view that the fragment's
-     *                           UI should be attached to.  The fragment should not add the view itself,
-     *                           but this can be used to generate the LayoutParams of the view.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     *                           from a previous saved state as given here.
-     * @return Return the View for the fragment's UI, or null.
+     * Inflate the necessary UI widgets for this fragment and apply user preference from the
+     * settings. Apply necessary listener behaviors when user entered text.
      */
     @Nullable
     @Override
@@ -198,7 +177,7 @@ public class NoteEditFragment extends Fragment {
      * button has predefined functions based on {@link android.content.DialogInterface.OnClickListener}
      * listener object passed as argument.
      *
-     * @param listener Custom listener for various behaviour of the dialog action buttons.
+     * @param listener              Custom listener for various behaviour of the dialog action buttons.
      * @param resourceDialogMessage String resource as the dialog content text.
      */
     private void createConfirmDiscardDialog(DialogInterface.OnClickListener listener,
@@ -232,18 +211,17 @@ public class NoteEditFragment extends Fragment {
      * Initiate discard note process via menu item. Pressing no button in dialog, cancels the dialog.
      * Pressing yes triggers various behaviours depending on the state of the note. The
      * following are the behaviours outline for pressing discard button in menu item:
-     *
+     * <p/>
      * <ul>
-     *     <li>If it is a new note and it is not updated,
-     *      set result to discard the new note and return to home.</li>
-     *     <li>If it is a new note and it is updated, it launches discard dialog.
-     *     Pressing yes sets result to discard the new note and return to home screen.</li>
-     *     <li>If it is an old note and note is not updated, return back to note view screen.</li>
-     *     <li>If it is an old note and note is updated, it launches discard dialog.
-     *     Pressing yes sets result to  discard new changes and revert to its previous state.
-     *     Return to note view screen.</li>
+     * <li>If it is a new note and it is not updated,
+     * set result to discard the new note and return to home.</li>
+     * <li>If it is a new note and it is updated, it launches discard dialog.
+     * Pressing yes sets result to discard the new note and return to home screen.</li>
+     * <li>If it is an old note and note is not updated, return back to note view screen.</li>
+     * <li>If it is an old note and note is updated, it launches discard dialog.
+     * Pressing yes sets result to  discard new changes and revert to its previous state.
+     * Return to note view screen.</li>
      * </ul>
-     *
      */
     private void discardNoteFromMenuItem() {
         if (mNewNote) {
@@ -301,39 +279,38 @@ public class NoteEditFragment extends Fragment {
      * Initiate discard note process via back press. Pressing no button in dialog, cancels the dialog.
      * Pressing yes triggers various behaviours depending on the state of the note. The
      * following are the behaviours outline for pressing back button:
-     *
+     * <p/>
      * <ul>
-     *     <li>If it is a new note and it is not updated,
-     *      set result to discard the new note and return to home.</li>
-     *      <li>If it is a new note and it is updated with no title, it launches discard dialog.
-     *     Pressing yes sets result to discard the new note and return to home screen.</li>
-     *     <li>If it is a new note and it is updated with title, Set the result to save.</li>
-     *     <li>If it is an old note and note is not updated, return back to note view screen.</li>
-     *     <li>If it is an old note and note is updated with no title, it launches discard dialog.
-     *     Pressing yes sets result to  discard new changes and revert to its previous state.
-     *     Return to note view screen.</li>
-     *     <li>If it is an old note and note is updated with title, set result to save.</li>
+     * <li>If it is a new note and it is not updated,
+     * set result to discard the new note and return to home.</li>
+     * <li>If it is a new note and it is updated with no title, it launches discard dialog.
+     * Pressing yes sets result to discard the new note and return to home screen.</li>
+     * <li>If it is a new note and it is updated with title, Set the result to save.</li>
+     * <li>If it is an old note and note is not updated, return back to note view screen.</li>
+     * <li>If it is an old note and note is updated with no title, it launches discard dialog.
+     * Pressing yes sets result to  discard new changes and revert to its previous state.
+     * Return to note view screen.</li>
+     * <li>If it is an old note and note is updated with title, set result to save.</li>
      * </ul>
-     *
      */
     public void discardNoteFromBackButton() {
         if (mNewNote) {
             if (mUpdated) {
                 if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()) {
-                        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which) {
-                                    case DialogInterface.BUTTON_POSITIVE:
-                                        sendResult(Activity.RESULT_CANCELED, true);
-                                        getActivity().finish();
-                                        break;
-                                    default:
-                                        dialog.cancel();
-                                        break;
-                                }
+                    DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which) {
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    sendResult(Activity.RESULT_CANCELED, true);
+                                    getActivity().finish();
+                                    break;
+                                default:
+                                    dialog.cancel();
+                                    break;
                             }
-                        };
+                        }
+                    };
 
                     createConfirmDiscardDialog(listener,
                             R.string.confirm_dialog_discard_new_note);
@@ -379,6 +356,13 @@ public class NoteEditFragment extends Fragment {
         }
     }
 
+    /**
+     * Apply result based on result code and boolean flag for note deletion parameters given.
+     *
+     * @param resultCode  The result code
+     * @param forDeletion boolean flag for note deletion. True if the note is to be deleted.
+     *                    Otherwise, false.
+     */
     private void sendResult(int resultCode, boolean forDeletion) {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_NOTE_FOR_DELETION, forDeletion);
@@ -390,17 +374,9 @@ public class NoteEditFragment extends Fragment {
     }
 
     /**
-     * Initialize the contents of the Activity's standard options menu.  You
-     * should place your menu items in to <var>menu</var>.  For this method
-     * to be called, you must have first called {@link #setHasOptionsMenu}.  See
-     * {@link Activity#onCreateOptionsMenu(Menu) Activity.onCreateOptionsMenu}
-     * for more information.
-     *
-     * @param menu     The options menu in which you place your items.
-     * @param inflater
-     * @see #setHasOptionsMenu
-     * @see #onPrepareOptionsMenu
-     * @see #onOptionsItemSelected
+     * {@inheritDoc}
+     * <p/>
+     * Inflate the menu options for this fragment.
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by ryan on 27/10/15.
+ * A singleton class as the gateway medium for handling {@link Note} in the database.
  */
 public class NoteBook {
 
@@ -39,9 +39,14 @@ public class NoteBook {
         isTwoPane = false;
     }
 
+    /**
+     * Retrieve all notes from the database.
+     *
+     * @return list of notes as {@link List} object.
+     */
     public List<Note> getNotes() {
         List<Note> notes = new ArrayList<>();
-        NoteCursorWrapper cursor = queryAllNotes(null,null);
+        NoteCursorWrapper cursor = queryAllNotes(null, null);
 
         try {
             cursor.moveToFirst();
@@ -73,6 +78,14 @@ public class NoteBook {
         }
     }
 
+    /**
+     * Helper method build the custom cursor wrapper for query that
+     * requires order by and limit parameters.
+     *
+     * @param orderBy SQLite parameter ORDER BY in String
+     * @param limit   SQLite parameter LIMIT in String
+     * @return NoteCursorWrapper object
+     */
     private NoteCursorWrapper queryNoteByOrderLimit(String orderBy, String limit) {
         Cursor cursor = mDatabase.query(
                 NoteTable.NAME,
@@ -88,6 +101,14 @@ public class NoteBook {
         return new NoteCursorWrapper(cursor);
     }
 
+    /**
+     * Helper method build the custom cursor wrapper for query that
+     * requires order by and limit parameters.
+     *
+     * @param whereClause SQLite parameter WHERE in String
+     * @param whereArgs   SQLite parameter arguments in String[]
+     * @return NoteCursorWrapper object
+     */
     private NoteCursorWrapper queryAllNotes(String whereClause, String[] whereArgs) {
         Cursor cursor = mDatabase.query(
                 NoteTable.NAME,
@@ -101,8 +122,6 @@ public class NoteBook {
 
         return new NoteCursorWrapper(cursor);
     }
-
-
 
     public Note getNote(UUID uuid) {
         String whereClause = NoteTable.Cols.UUID + " = ?";

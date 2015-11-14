@@ -16,7 +16,7 @@ import com.github.daytron.plain_memo.view.fragment.NoteViewFragment;
 
 
 /**
- * Created by ryan on 27/10/15.
+ * Abstract class for handling fragments to its subclasses Activities.
  */
 public abstract class SingleFragmentActivity extends AppCompatActivity {
 
