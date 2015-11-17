@@ -4,11 +4,11 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
     defaultConfig {
-        applicationId "com.github.daytron.plain_memo"
+        applicationId "com.github.daytron.plain_memo.beta"
         resValue "string", "app_name", "Plain Memo"
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 1
+        versionCode 7
         versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -23,7 +23,6 @@ android {
     }
     productFlavors {
         beta {
-            applicationId 'com.github.daytron.plain_memo.beta'
             resValue "string", "app_name", "Plain Memo Beta"
             versionName '0.5.2 Beta'
             versionCode 6
