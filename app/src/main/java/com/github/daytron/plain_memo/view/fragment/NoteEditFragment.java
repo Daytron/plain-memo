@@ -44,21 +44,24 @@ public class NoteEditFragment extends Fragment {
             "com.github.daytron.plain_memo.note_values";
     private static final String ARG_NOTE_EDIT_ID = "note_edit_id";
     private static final String ARG_NOTE_IS_NEW = "note_edit_is_new";
+    private static final String ARG_NOTE_IS_FOR_BODY_OFFSET = "note_edit_is_for_body_offset";
     private static final String ARG_NOTE_OFFSET = "note_edit_offset";
 
     private Note mNote;
     private EditText mTitleField;
     private EditText mBodyField;
 
-    private boolean mNewNote;
+    private boolean mIsNewNote;
     private boolean mUpdated;
+    private boolean mIsForBodyOffset;
     private long mCursorBodyOffset;
 
     public static NoteEditFragment newInstance(UUID noteId, boolean isNewNote,
-                                               long offset) {
+                                               boolean isForBodyOffset, long offset) {
         Bundle args = new Bundle();
         args.putSerializable(ARG_NOTE_EDIT_ID, noteId);
         args.putBoolean(ARG_NOTE_IS_NEW, isNewNote);
+        args.putBoolean(ARG_NOTE_IS_FOR_BODY_OFFSET, isForBodyOffset);
         args.putLong(ARG_NOTE_OFFSET, offset);
 
         NoteEditFragment fragment = new NoteEditFragment();
@@ -77,9 +80,9 @@ public class NoteEditFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         UUID noteId = (UUID) getArguments().getSerializable(ARG_NOTE_EDIT_ID);
-        mNewNote = getArguments().getBoolean(ARG_NOTE_IS_NEW);
+        mIsNewNote = getArguments().getBoolean(ARG_NOTE_IS_NEW);
         mNote = NoteBook.get(getActivity()).getNote(noteId);
-
+        mIsForBodyOffset = getArguments().getBoolean(ARG_NOTE_IS_FOR_BODY_OFFSET);
         mCursorBodyOffset = getArguments().getLong(ARG_NOTE_OFFSET);
 
         setHasOptionsMenu(true);
@@ -100,7 +103,7 @@ public class NoteEditFragment extends Fragment {
         // Change titlebar text
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         ActionBar actionBar = activity.getSupportActionBar();
-        String titleText = ((mNewNote) ? getResources().getString(R.string.toolbar_title_new_note) :
+        String titleText = ((mIsNewNote) ? getResources().getString(R.string.toolbar_title_new_note) :
                 getResources().getString(R.string.toolbar_title_edit_note));
         if (actionBar != null) actionBar.setTitle(titleText);
 
@@ -122,16 +125,34 @@ public class NoteEditFragment extends Fragment {
         mBodyField.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
         mBodyField.setAllCaps(false);
 
-        if (mNewNote) {
+        if (mIsNewNote) {
             mTitleField.requestFocus();
         } else {
-            mBodyField.requestFocus();
-            // Apply offset cursor position from NoteViewFragment
-            if (mCursorBodyOffset > 0) {
-                mBodyField.setSelection((int) mCursorBodyOffset);
+            boolean isSingleTouchEnabled = sharedPref
+                    .getBoolean(getString(R.string.pref_appearance_single_tap_edit_key), false);
+
+            if (isSingleTouchEnabled) {
+                if (mIsForBodyOffset) {
+                    mBodyField.requestFocus();
+                    // Apply cursor offset position for body field
+                    mBodyField.setSelection((int) mCursorBodyOffset);
+                } else {
+                    if (mCursorBodyOffset > -1) {
+                        mTitleField.requestFocus();
+                        // Apply cursor offset position for title field
+                        mTitleField.setSelection((int) mCursorBodyOffset);
+                    } else {
+                        mBodyField.requestFocus();
+                        // This when offset is -1
+                        // For clicking edit menu option
+                        // Placing cursor at the end of the body text
+                        mBodyField.setSelection(mBodyField.length());
+                    }
+                }
             } else {
-                // move cursor in the last position
-                // Default behaviour
+                // If single touch edit is not enabled
+                // Placing cursor at the end of the body text by default
+                mBodyField.requestFocus();
                 mBodyField.setSelection(mBodyField.length());
             }
         }
@@ -224,7 +245,7 @@ public class NoteEditFragment extends Fragment {
      * </ul>
      */
     private void discardNoteFromMenuItem() {
-        if (mNewNote) {
+        if (mIsNewNote) {
             if (mUpdated) {
                 DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
                     @Override
@@ -294,7 +315,7 @@ public class NoteEditFragment extends Fragment {
      * </ul>
      */
     public void discardNoteFromBackButton() {
-        if (mNewNote) {
+        if (mIsNewNote) {
             if (mUpdated) {
                 if (mNote.getTitle() == null || mNote.getTitle().trim().isEmpty()) {
                     DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -366,7 +387,7 @@ public class NoteEditFragment extends Fragment {
     private void sendResult(int resultCode, boolean forDeletion) {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_NOTE_FOR_DELETION, forDeletion);
-        intent.putExtra(EXTRA_NOTE_IS_NEW, mNewNote);
+        intent.putExtra(EXTRA_NOTE_IS_NEW, mIsNewNote);
         intent.putExtra(EXTRA_NOTE_STRING_VALUES, new String[]{
                 mNote.getTitle(), mNote.getBody()
         });

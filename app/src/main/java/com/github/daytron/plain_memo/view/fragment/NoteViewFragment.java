@@ -15,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Layout;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -108,7 +109,7 @@ public class NoteViewFragment extends Fragment {
         }
     };
 
-    private final View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+    private final View.OnTouchListener mTouchBodyListener = new View.OnTouchListener() {
 
         @Override
         public boolean onTouch(View view, MotionEvent event) {
@@ -117,7 +118,6 @@ public class NoteViewFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 // Detect if the view is currently long pressed.
                 if (mIsLongPress) {
-                    // Do something when the button is released.
                     mIsLongPress = false;
                 } else {
                     if (mSingleTouchEditEnabled) {
@@ -126,10 +126,37 @@ public class NoteViewFragment extends Fragment {
                         float y = event.getY() + mBodyTextView.getScrollY();
                         long offset = layout.getOffsetForPosition(x, y);
 
-                        callEditFragment(false, offset);
+                        callEditFragment(false, true, offset);
                     }
                 }
             }
+            return false;
+        }
+    };
+
+    private final View.OnTouchListener mTouchTitleListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            v.onTouchEvent(event);
+            // When the touch is released.
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // Detect if the view is currently long pressed.
+                if (mIsLongPress) {
+                    mIsLongPress = false;
+                } else {
+                    if (mSingleTouchEditEnabled) {
+                        Layout layout = ((TextView) v).getLayout();
+                        float x = event.getX() + mTitleTextView.getScrollX();
+                        long offset = layout.getOffsetForHorizontal(0,x);
+
+                        if (offset > 0) {
+                            if(x<=layout.getLineMax(0)) offset = offset - 1;
+                        }
+                        callEditFragment(false, false, offset);
+                    }
+                }
+            }
+
             return false;
         }
     };
@@ -202,14 +229,8 @@ public class NoteViewFragment extends Fragment {
         mTitleTextView.setText(mNote.getTitle());
         mTitleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize +
                 GlobalValues.FONT_SIZE_DIFFERENCE);
-        mTitleTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mSingleTouchEditEnabled) {
-                    callEditFragment(false, 0);
-                }
-            }
-        });
+        mTitleTextView.setOnLongClickListener(mHoldPressedListener);
+        mTitleTextView.setOnTouchListener(mTouchTitleListener);
 
         mBodyTextView = (TextView) v.findViewById(R.id.note_body_text_view);
         mBodyTextView.setAllCaps(false);
@@ -217,20 +238,13 @@ public class NoteViewFragment extends Fragment {
         mBodyTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
 
         mBodyTextView.setOnLongClickListener(mHoldPressedListener);
-        mBodyTextView.setOnTouchListener(mTouchListener);
+        mBodyTextView.setOnTouchListener(mTouchBodyListener);
 
         mDateTextView = (TextView) v.findViewById(R.id.note_date_text_view);
         mDateTextView.setAllCaps(false);
         mDateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize -
                 GlobalValues.FONT_SIZE_DIFFERENCE);
-        mDateTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mSingleTouchEditEnabled) {
-                    callEditFragment(false, 0);
-                }
-            }
-        });
+        mDateTextView.setOnLongClickListener(mHoldPressedListener);
 
         updateDate();
         return v;
@@ -287,7 +301,7 @@ public class NoteViewFragment extends Fragment {
         // back button, the views are already setup and inflated.
         // Allowing for easy binding new data changes
         if (mNewNote) {
-            callEditFragment(true, 0);
+            callEditFragment(true, false, -1);
             mNewNote = false;
         }
     }
@@ -479,7 +493,7 @@ public class NoteViewFragment extends Fragment {
             case R.id.menu_item_edit_note:
                 cancelSearchQueryFromTwoPane();
                 // start edit fragment
-                callEditFragment(false, 0);
+                callEditFragment(false, false, -1);
                 return true;
             case R.id.menu_item_delete_note:
                 cancelSearchQueryFromTwoPane();
@@ -553,9 +567,9 @@ public class NoteViewFragment extends Fragment {
         }
     }
 
-    private void callEditFragment(boolean isNewNote, long offset) {
+    private void callEditFragment(boolean isNewNote, boolean isForBodyOffset, long offset) {
         Intent intent = NoteEditActivity.newIntent(getActivity(), mNote.getID(), isNewNote,
-                offset);
+                isForBodyOffset, offset);
         startActivityForResult(intent, REQUEST_NOTE_EDIT);
     }
 
