@@ -24,6 +24,8 @@ public class NoteEditActivity extends AppCompatActivity {
             "com.github.daytron.plain_memo.note_edit_id";
     private static final String EXTRA_NOTE_IS_NEW =
             "com.github.daytron.plain_memo.note_is_new";
+    private static final String EXTRA_NOTE_IS_FOR_BODY_OFFSET =
+            "com.github.daytron.plain_memo.note_is_for_body_offset";
     private static final String EXTRA_NOTE_TOUCH_OFFSET =
             "com.github.daytron.plain_memo.note_touch_offset";
 
@@ -48,8 +50,11 @@ public class NoteEditActivity extends AppCompatActivity {
                 if (fragment == null) {
                     UUID noteId = (UUID) getIntent().getSerializableExtra(EXTRA_NOTE_EDIT_ID);
                     boolean isNewNote = getIntent().getBooleanExtra(EXTRA_NOTE_IS_NEW, false);
+                    boolean isForBodyOffset = getIntent()
+                            .getBooleanExtra(EXTRA_NOTE_IS_FOR_BODY_OFFSET, false);
                     long offset = getIntent().getLongExtra(EXTRA_NOTE_TOUCH_OFFSET, 0);
-                    fragment = NoteEditFragment.newInstance(noteId, isNewNote, offset);
+                    fragment = NoteEditFragment.newInstance(noteId, isNewNote, isForBodyOffset,
+                            offset);
 
                     fm.beginTransaction()
                             .add(R.id.fragment_container, fragment)
@@ -69,10 +74,11 @@ public class NoteEditActivity extends AppCompatActivity {
      * @return Intent built
      */
     public static Intent newIntent(Context packageContext, UUID noteId, boolean isNewNote,
-                                   long offset) {
+                                   boolean isForBodyOffset, long offset) {
         Intent intent = new Intent(packageContext, NoteEditActivity.class);
         intent.putExtra(EXTRA_NOTE_EDIT_ID, noteId);
         intent.putExtra(EXTRA_NOTE_IS_NEW, isNewNote);
+        intent.putExtra(EXTRA_NOTE_IS_FOR_BODY_OFFSET, isForBodyOffset);
         intent.putExtra(EXTRA_NOTE_TOUCH_OFFSET, offset);
         return intent;
     }
