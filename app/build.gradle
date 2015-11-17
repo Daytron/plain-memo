@@ -29,7 +29,6 @@ android {
             versionCode 6
         }
         full {
-            resValue "string", "app_name", "Plain Memo"
         }
     }
 }
