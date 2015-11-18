@@ -16,12 +16,12 @@ Features
 - Share notes to your favorite apps and vice versa
 
 
-Download Beta
--------------
+Installation
+------------
 
-The app is now available for beta testing on Google Play:
+The app is available on Google Play:
 
-[![Google Play link](https://raw.githubusercontent.com/Daytron/plain-memo/develop/Images/google-play-badge.png?token=AGk1Wj--crPga9u3OkOf2W8UnpKAinSDks5WUHbVwA%3D%3D)](https://play.google.com/apps/testing/com.github.daytron.plain_memo.beta)
+[![Google Play link](https://raw.githubusercontent.com/Daytron/plain-memo/develop/Images/google-play-badge.png?token=AGk1Wj--crPga9u3OkOf2W8UnpKAinSDks5WUHbVwA%3D%3D)](https://play.google.com/store/apps/details?id=com.github.daytron.plain_memo.beta)
 
 
 ![Screenshot](https://raw.githubusercontent.com/Daytron/plain-memo/develop/Images/ScreenshotGithub.png?token=AGk1WpDWsZRapgpcT2m4Y-ZHY-ra3Y7Lks5WTxJ3wA%3D%3D)
