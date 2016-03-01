@@ -131,21 +131,21 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
         }
 
         private void initAboutPreference() {
-            String copyright = "Copyright \u00a9 " +
-                    getString(R.string.app_release_year);
+            StringBuilder aboutStringBuilder = new StringBuilder();
+            aboutStringBuilder
+                    .append("Copyright © ");
+
             Calendar calendar = Calendar.getInstance();
             int year = calendar.get(Calendar.YEAR);
-            if (!getString(R.string.app_release_year).equalsIgnoreCase(
-                    Integer.toString(year)
-            )) {
-                copyright += "-" + calendar;
-            }
-            copyright += " " + getString(R.string.app_developer);
+
+            aboutStringBuilder.append(year)
+                    .append(" ")
+                    .append(getString(R.string.app_developer));
 
             String aboutTitle = getString(R.string.app_name) + " " + BuildConfig.VERSION_NAME;
 
             Preference aboutPref = findPreference(getString(R.string.pref_general_about_key));
-            aboutPref.setSummary(copyright);
+            aboutPref.setSummary(aboutStringBuilder.toString());
             aboutPref.setTitle(aboutTitle);
         }
 
