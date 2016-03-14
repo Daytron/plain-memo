@@ -8,8 +8,8 @@ android {
         resValue "string", "app_name", "Plain Memo"
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 7
-        versionName "1.0.0"
+        versionCode 8
+        versionName "1.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
