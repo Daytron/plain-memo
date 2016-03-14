@@ -22,4 +22,10 @@ public class GlobalValues {
             + "\n5. Support for large screen or tablet devices."
             + "\n6. Share your notes to your favourite apps and vice versa."
             + "\n\nI hope you enjoy using Plain Memo.";
+
+    public static final String ChangeLogTitle = "Change Log";
+    public static final String ChangeLogMsg = "\nPlainMemo 1.0.0 (November 17 2015)" +
+            "\n- First Production Release." +
+            "\n\nPlainMemo 1.0.1 (March 14 2016)" +
+            "\n- Fixed date in the about section.";
 }

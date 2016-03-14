@@ -1,5 +1,6 @@
 package com.github.daytron.plain_memo.settings;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,6 +12,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.design.widget.AppBarLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 
 import com.github.daytron.plain_memo.BuildConfig;
 import com.github.daytron.plain_memo.R;
+import com.github.daytron.plain_memo.data.GlobalValues;
 import com.github.daytron.plain_memo.database.NoteBook;
 import com.jaredrummler.android.device.DeviceName;
 
@@ -78,7 +81,6 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-
             String settingsVal = getArguments().getString(getString(R.string.action_settings));
             if (getString(R.string.pref_general).equals(settingsVal)) {
                 addPreferencesFromResource(R.xml.settings_general);
@@ -122,12 +124,31 @@ public class UserPreferenceActivity extends AppCompatPreferenceActivity {
          * the first production release.
          */
         private void initChangelogPref() {
-            if (BuildConfig.VERSION_CODE == 1) {
-                Preference changelogPref = findPreference(
-                        getString(R.string.pref_general_changelog_key)
-                );
-                changelogPref.setEnabled(false);
-            }
+
+            Preference changelogPref = findPreference(
+                    getString(R.string.pref_general_changelog_key)
+            );
+
+            changelogPref.setOnPreferenceClickListener(
+                    new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    AlertDialog.Builder changeLogBuilder = new AlertDialog.Builder(getActivity());
+                    changeLogBuilder.setTitle(GlobalValues.ChangeLogTitle);
+                    changeLogBuilder.setMessage(GlobalValues.ChangeLogMsg);
+                    changeLogBuilder.setPositiveButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+
+                    AlertDialog alertDialog = changeLogBuilder.create();
+                    alertDialog.show();
+                    return true;
+                }
+            });
         }
 
         private void initAboutPreference() {
